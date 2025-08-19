@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs (Compatibility version) -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -136,199 +142,202 @@
         </div>
     </footer>
 
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Global State ---
-        let userFinancialProfile = null;
-        let db;
-        let currentUserId;
-
-        // --- UI Element References ---
-        const userDisplay = document.getElementById('user-display');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const analysisResult = document.getElementById('analysisResult');
-        const simulateBtn = document.getElementById('simulateBtn');
-        const scenarioInput = document.getElementById('scenarioInput');
-        const simulationResult = document.getElementById('simulationResult');
-        const chatInput = document.getElementById('chatInput');
-        const sendChatBtn = document.getElementById('sendChatBtn');
-        const chatBox = document.getElementById('chatBox');
-        
-        // --- Main Application Logic ---
-        try {
-            const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-            const firebaseConfig = JSON.parse(firebaseConfigString);
-            if (!firebaseConfig.apiKey) throw new Error("Firebase config is missing.");
-
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            db = getFirestore(app);
-
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUserId = user.uid;
-                    userDisplay.textContent = `Welcome, ${user.displayName || user.email}!`;
-                    await loadFinancialProfile();
-                    enableAllInputs();
-                } else {
-                    const newUrl = new URL('index.html', window.location.href).href;
-                    window.location.href = newUrl;
-                }
-            });
-        } catch (error) {
-            console.error("Fatal Error during initialization:", error);
-            document.body.innerHTML = `<div class="text-center p-8 text-red-500"><h1 class="text-2xl font-bold">Application Error</h1><p>Could not initialize. Check console.</p></div>`;
-        }
-        
-        // --- Gemini API Integration ---
-        const apiKey = "AIzaSyCQpluFQok4C0jkqbQIMRKat434aF4zvXY";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-        async function callGemini(prompt) {
-            // Redacted for brevity, same robust function as before
-            const payload = { contents: [{ parts: [{ text: prompt }] }] };
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) {
-                 const errorBody = await response.json();
-                 console.error("API Error:", errorBody);
-                 return `Error: ${errorBody.error.message}`;
-            }
-            const result = await response.json();
-            return result.candidates[0]?.content?.parts[0]?.text || "Sorry, I couldn't get a response.";
-        }
-
-        // --- Feature 1: Financial Profile Logic ---
-        const financialInputs = {
-            monthlyIncome: document.getElementById('monthlyIncome'),
-            currentSavings: document.getElementById('currentSavings'),
-            housing: document.getElementById('housing'),
-            food: document.getElementById('food'),
-            transport: document.getElementById('transport'),
-            other: document.getElementById('other'),
-            financialGoals: document.getElementById('financialGoals')
-        };
-
-        async function saveFinancialProfile() {
-            if (!currentUserId) return;
-            const profileData = {
-                monthlyIncome: financialInputs.monthlyIncome.value,
-                currentSavings: financialInputs.currentSavings.value,
-                expenses: {
-                    housing: financialInputs.housing.value,
-                    food: financialInputs.food.value,
-                    transport: financialInputs.transport.value,
-                    other: financialInputs.other.value,
-                },
-                financialGoals: financialInputs.financialGoals.value
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Firebase Initialization ---
+            const firebaseConfig = {
+                apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
+                authDomain: "finscope-282b3.firebaseapp.com",
+                projectId: "finscope-282b3",
+                storageBucket: "finscope-282b3.appspot.com",
+                messagingSenderId: "838937656151",
+                appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
+                measurementId: "G-R8GE51ZT8J"
             };
-            const profileRef = doc(db, "users", currentUserId, "financialProfile", "data");
-            await setDoc(profileRef, profileData, { merge: true });
-            userFinancialProfile = profileData; // Update global state
-            return profileData;
-        }
 
-        async function loadFinancialProfile() {
-            if (!currentUserId) return;
-            const profileRef = doc(db, "users", currentUserId, "financialProfile", "data");
-            const docSnap = await getDoc(profileRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                userFinancialProfile = data;
-                financialInputs.monthlyIncome.value = data.monthlyIncome || '';
-                financialInputs.currentSavings.value = data.currentSavings || '';
-                financialInputs.housing.value = data.expenses?.housing || '';
-                financialInputs.food.value = data.expenses?.food || '';
-                financialInputs.transport.value = data.expenses?.transport || '';
-                financialInputs.other.value = data.expenses?.other || '';
-                financialInputs.financialGoals.value = data.financialGoals || '';
+            // --- Global State ---
+            let userFinancialProfile = null;
+            let db;
+            let currentUserId;
+
+            // --- UI Element References ---
+            const userDisplay = document.getElementById('user-display');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analysisResult = document.getElementById('analysisResult');
+            const simulateBtn = document.getElementById('simulateBtn');
+            const scenarioInput = document.getElementById('scenarioInput');
+            const simulationResult = document.getElementById('simulationResult');
+            const chatInput = document.getElementById('chatInput');
+            const sendChatBtn = document.getElementById('sendChatBtn');
+            const chatBox = document.getElementById('chatBox');
+
+            try {
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                const auth = firebase.auth();
+                db = firebase.firestore();
+
+                // --- Auth State Management ---
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        userDisplay.textContent = `Welcome, ${user.displayName || user.email}!`;
+                        await loadFinancialProfile();
+                        enableAllInputs();
+                    } else {
+                        const newUrl = new URL('index.html', window.location.href).href;
+                        window.location.href = newUrl;
+                    }
+                });
+            } catch (error) {
+                console.error("Fatal Error during Firebase initialization:", error);
             }
-        }
 
-        async function handleAnalysis() {
-            analysisResult.innerHTML = '<p class="text-gray-500 animate-pulse">Analyzing your profile...</p>';
-            const profileData = await saveFinancialProfile();
-            const prompt = `Analyze the following financial profile and provide a concise summary of the user's financial health, along with 3 actionable tips. Be encouraging and clear. Profile: ${JSON.stringify(profileData)}`;
-            const resultText = await callGemini(prompt);
-            analysisResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
-        }
+            // --- Gemini API Integration ---
+            const apiKey = "AIzaSyCQpluFQok4C0jkqbQIMRKat434aF4zvXY";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-        // --- Feature 2: Simulation Logic ---
-        async function handleSimulation() {
-            const query = scenarioInput.value.trim();
-            if (query === '') {
-                simulationResult.innerHTML = '<p class="text-red-500">Please enter a scenario.</p>';
-                return;
+            async function callGemini(prompt) {
+                const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error:", errorBody);
+                    return `Error: ${errorBody.error.message}`;
+                }
+                const result = await response.json();
+                return result.candidates[0]?.content?.parts[0]?.text || "Sorry, I couldn't get a response.";
             }
-            if (!userFinancialProfile) {
-                simulationResult.innerHTML = '<p class="text-red-500">Please save your financial profile first.</p>';
-                return;
-            }
-            simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Simulating scenario...</p>';
-            const prompt = `Given this financial profile: ${JSON.stringify(userFinancialProfile)}. Now, analyze this "what-if" scenario: "${query}". Provide a clear, concise analysis with bullet points on the potential impact.`;
-            const resultText = await callGemini(prompt);
-            simulationResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
-        }
-        
-        // --- Feature 3: Chat Logic ---
-        const addMessage = (message, sender) => {
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'mb-4');
-            if (sender === 'user') {
-                bubbleDiv.classList.add('bg-blue-600', 'text-white', 'self-end');
-                bubbleDiv.textContent = message;
-            } else {
-                bubbleDiv.classList.add('bg-gray-200', 'text-gray-800', 'self-start');
-                bubbleDiv.innerHTML = message;
-            }
-            chatBox.appendChild(bubbleDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-        
-        async function handleChatSend() {
-            const userMessage = chatInput.value.trim();
-            if (userMessage === '') return;
-            if (!userFinancialProfile) {
-                addMessage("Please save your financial profile before we can chat!", 'twin');
-                return;
-            }
-            addMessage(userMessage, 'user');
-            chatInput.value = '';
-            chatInput.disabled = true;
-            sendChatBtn.disabled = true;
 
-            addMessage(`<span class="blinking-cursor"></span>`, 'twin');
-            const typingIndicator = chatBox.lastElementChild;
-            
-            const prompt = `You are a friendly AI financial twin. Use the user's financial profile as context: ${JSON.stringify(userFinancialProfile)}. Now, answer their question: "${userMessage}"`;
-            const twinResponse = await callGemini(prompt);
-            
-            typingIndicator.remove();
-            addMessage(twinResponse.replace(/\n/g, '<br>'), 'twin');
+            // --- Feature 1: Financial Profile Logic ---
+            const financialInputs = {
+                monthlyIncome: document.getElementById('monthlyIncome'),
+                currentSavings: document.getElementById('currentSavings'),
+                housing: document.getElementById('housing'),
+                food: document.getElementById('food'),
+                transport: document.getElementById('transport'),
+                other: document.getElementById('other'),
+                financialGoals: document.getElementById('financialGoals')
+            };
 
-            chatInput.disabled = false;
-            sendChatBtn.disabled = false;
-            chatInput.focus();
-        }
-        
-        // --- General Functions & Event Listeners ---
-        function enableAllInputs() {
-            Object.values(financialInputs).forEach(input => input.disabled = false);
-            analyzeBtn.disabled = false;
-            simulateBtn.disabled = false;
-            scenarioInput.disabled = false;
-            chatInput.disabled = false;
-            sendChatBtn.disabled = false;
-        }
+            async function saveFinancialProfile() {
+                if (!currentUserId) return;
+                const profileData = {
+                    monthlyIncome: financialInputs.monthlyIncome.value,
+                    currentSavings: financialInputs.currentSavings.value,
+                    expenses: {
+                        housing: financialInputs.housing.value,
+                        food: financialInputs.food.value,
+                        transport: financialInputs.transport.value,
+                        other: financialInputs.other.value,
+                    },
+                    financialGoals: financialInputs.financialGoals.value
+                };
+                const profileRef = db.collection("users").doc(currentUserId).collection("financialProfile").doc("data");
+                await profileRef.set(profileData, { merge: true });
+                userFinancialProfile = profileData;
+                return profileData;
+            }
 
-        analyzeBtn.addEventListener('click', handleAnalysis);
-        simulateBtn.addEventListener('click', handleSimulation);
-        scenarioInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSimulation(); });
-        sendChatBtn.addEventListener('click', handleChatSend);
-        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleChatSend(); });
+            async function loadFinancialProfile() {
+                if (!currentUserId) return;
+                const profileRef = db.collection("users").doc(currentUserId).collection("financialProfile").doc("data");
+                const docSnap = await profileRef.get();
+                if (docSnap.exists) {
+                    const data = docSnap.data();
+                    userFinancialProfile = data;
+                    financialInputs.monthlyIncome.value = data.monthlyIncome || '';
+                    financialInputs.currentSavings.value = data.currentSavings || '';
+                    financialInputs.housing.value = data.expenses?.housing || '';
+                    financialInputs.food.value = data.expenses?.food || '';
+                    financialInputs.transport.value = data.expenses?.transport || '';
+                    financialInputs.other.value = data.expenses?.other || '';
+                    financialInputs.financialGoals.value = data.financialGoals || '';
+                }
+            }
+
+            async function handleAnalysis() {
+                analysisResult.innerHTML = '<p class="text-gray-500 animate-pulse">Analyzing your profile...</p>';
+                const profileData = await saveFinancialProfile();
+                const prompt = `Analyze the following financial profile and provide a concise summary of the user's financial health, along with 3 actionable tips. Be encouraging and clear. Profile: ${JSON.stringify(profileData)}`;
+                const resultText = await callGemini(prompt);
+                analysisResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
+            }
+
+            // --- Feature 2: Simulation Logic ---
+            async function handleSimulation() {
+                const query = scenarioInput.value.trim();
+                if (query === '') {
+                    simulationResult.innerHTML = '<p class="text-red-500">Please enter a scenario.</p>';
+                    return;
+                }
+                if (!userFinancialProfile) {
+                    simulationResult.innerHTML = '<p class="text-red-500">Please save your financial profile first.</p>';
+                    return;
+                }
+                simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Simulating scenario...</p>';
+                const prompt = `Given this financial profile: ${JSON.stringify(userFinancialProfile)}. Now, analyze this "what-if" scenario: "${query}". Provide a clear, concise analysis with bullet points on the potential impact.`;
+                const resultText = await callGemini(prompt);
+                simulationResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
+            }
+
+            // --- Feature 3: Chat Logic ---
+            const addMessage = (message, sender) => {
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'mb-4');
+                if (sender === 'user') {
+                    bubbleDiv.classList.add('bg-blue-600', 'text-white', 'self-end');
+                    bubbleDiv.textContent = message;
+                } else {
+                    bubbleDiv.classList.add('bg-gray-200', 'text-gray-800', 'self-start');
+                    bubbleDiv.innerHTML = message;
+                }
+                chatBox.appendChild(bubbleDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            };
+
+            async function handleChatSend() {
+                const userMessage = chatInput.value.trim();
+                if (userMessage === '') return;
+                if (!userFinancialProfile) {
+                    addMessage("Please save your financial profile before we can chat!", 'twin');
+                    return;
+                }
+                addMessage(userMessage, 'user');
+                chatInput.value = '';
+                chatInput.disabled = true;
+                sendChatBtn.disabled = true;
+
+                addMessage(`<span class="blinking-cursor"></span>`, 'twin');
+                const typingIndicator = chatBox.lastElementChild;
+
+                const prompt = `You are a friendly AI financial twin. Use the user's financial profile as context: ${JSON.stringify(userFinancialProfile)}. Now, answer their question: "${userMessage}"`;
+                const twinResponse = await callGemini(prompt);
+
+                typingIndicator.remove();
+                addMessage(twinResponse.replace(/\n/g, '<br>'), 'twin');
+
+                chatInput.disabled = false;
+                sendChatBtn.disabled = false;
+                chatInput.focus();
+            }
+
+            // --- General Functions & Event Listeners ---
+            function enableAllInputs() {
+                Object.values(financialInputs).forEach(input => input.disabled = false);
+                analyzeBtn.disabled = false;
+                simulateBtn.disabled = false;
+                scenarioInput.disabled = false;
+                chatInput.disabled = false;
+                sendChatBtn.disabled = false;
+            }
+
+            analyzeBtn.addEventListener('click', handleAnalysis);
+            simulateBtn.addEventListener('click', handleSimulation);
+            scenarioInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSimulation(); });
+            sendChatBtn.addEventListener('click', handleChatSend);
+            chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleChatSend(); });
+        });
     </script>
 </body>
 </html>
