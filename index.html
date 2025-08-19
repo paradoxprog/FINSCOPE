@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -164,159 +170,149 @@
         </div>
     </div>
 
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signInAnonymously,
-            signInWithCustomToken
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Firebase Initialization ---
+            const firebaseConfig = {
+                apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
+                authDomain: "finscope-282b3.firebaseapp.com",
+                projectId: "finscope-282b3",
+                storageBucket: "finscope-282b3.appspot.com",
+                messagingSenderId: "838937656151",
+                appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
+                measurementId: "G-R8GE51ZT8J"
+            };
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            const appId = firebaseConfig.appId;
 
-        // --- Firebase Initialization ---
-        // These global variables are provided by the environment.
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+            // --- Authentication Logic ---
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // If user is logged in, redirect to the main application page
+                    console.log("User is signed in, redirecting to main.html");
+                    window.location.href = 'main.html';
+                } else {
+                    console.log("User is signed out.");
+                }
+            });
 
-        // --- Authentication Logic ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                // If user is logged in, redirect to the main application page
-                console.log("User is signed in, redirecting to main.html");
-                window.location.href = 'main.html';
-            } else {
-                console.log("User is signed out.");
-            }
+            // --- UI Elements ---
+            const authModal = document.getElementById('authModal');
+            const modalContent = document.getElementById('modalContent');
+            const openModalBtns = [document.getElementById('loginBtn'), document.getElementById('getStartedBtnHero')];
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const signupTab = document.getElementById('signupTab');
+            const loginTab = document.getElementById('loginTab');
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
+            const authError = document.getElementById('authError');
+
+            // --- Modal and Tab Logic ---
+            const openModal = () => authModal.classList.remove('hidden');
+            const closeModal = () => authModal.classList.add('hidden');
+
+            openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
+            closeModalBtn.addEventListener('click', closeModal);
+            authModal.addEventListener('click', e => {
+                if (e.target === authModal) closeModal();
+            });
+
+            signupTab.addEventListener('click', () => {
+                signupTab.classList.add('tab-active');
+                loginTab.classList.remove('tab-active');
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                authError.textContent = '';
+            });
+
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('tab-active');
+                signupTab.classList.remove('tab-active');
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                authError.textContent = '';
+            });
+
+            // --- Firebase Auth Functions ---
+
+            // Helper to save user data to Firestore
+            const saveUserData = async (user, additionalData = {}) => {
+                if (!user) return;
+                const userRef = db.doc(`/artifacts/${appId}/users/${user.uid}/profile/data`);
+                try {
+                    await userRef.set({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || additionalData.name,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        ...additionalData
+                    }, { merge: true });
+                    console.log("User data saved successfully.");
+                } catch (error) {
+                    console.error("Error saving user data:", error);
+                }
+            };
+            
+            // Sign Up with Email and Password
+            const signupBtn = document.getElementById('signupBtn');
+            signupBtn.addEventListener('click', async () => {
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                authError.textContent = '';
+
+                if (!name || !email || !password) {
+                    authError.textContent = 'Please fill out all fields.';
+                    return;
+                }
+
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    await saveUserData(userCredential.user, { name });
+                    // onAuthStateChanged will handle the redirect
+                } catch (error) {
+                    authError.textContent = error.message;
+                }
+            });
+
+            // Log In with Email and Password
+            const loginEmailBtn = document.getElementById('loginEmailBtn');
+            loginEmailBtn.addEventListener('click', async () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                authError.textContent = '';
+
+                if (!email || !password) {
+                    authError.textContent = 'Please enter email and password.';
+                    return;
+                }
+
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    // onAuthStateChanged will handle the redirect
+                } catch (error) {
+                    authError.textContent = error.message;
+                }
+            });
+
+            // Sign In with Google
+            const googleSignInBtn = document.getElementById('googleSignInBtn');
+            googleSignInBtn.addEventListener('click', async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                authError.textContent = '';
+                try {
+                    const result = await auth.signInWithPopup(provider);
+                    await saveUserData(result.user);
+                    // onAuthStateChanged will handle the redirect
+                } catch (error) {
+                    authError.textContent = error.message;
+                }
+            });
         });
-
-        // --- UI Elements ---
-        const authModal = document.getElementById('authModal');
-        const modalContent = document.getElementById('modalContent');
-        const openModalBtns = [document.getElementById('loginBtn'), document.getElementById('getStartedBtnHero')];
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const signupTab = document.getElementById('signupTab');
-        const loginTab = document.getElementById('loginTab');
-        const signupForm = document.getElementById('signupForm');
-        const loginForm = document.getElementById('loginForm');
-        const authError = document.getElementById('authError');
-
-        // --- Modal and Tab Logic ---
-        const openModal = () => authModal.classList.remove('hidden');
-        const closeModal = () => authModal.classList.add('hidden');
-
-        openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
-        closeModalBtn.addEventListener('click', closeModal);
-        authModal.addEventListener('click', e => {
-            if (e.target === authModal) closeModal();
-        });
-
-        signupTab.addEventListener('click', () => {
-            signupTab.classList.add('tab-active');
-            loginTab.classList.remove('tab-active');
-            signupForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-            authError.textContent = '';
-        });
-
-        loginTab.addEventListener('click', () => {
-            loginTab.classList.add('tab-active');
-            signupTab.classList.remove('tab-active');
-            loginForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
-            authError.textContent = '';
-        });
-
-        // --- Firebase Auth Functions ---
-
-        // Helper to save user data to Firestore
-        const saveUserData = async (user, additionalData = {}) => {
-            if (!user) return;
-            const userRef = doc(db, `/artifacts/${appId}/users/${user.uid}/profile/data`);
-            try {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || additionalData.name,
-                    createdAt: serverTimestamp(),
-                    ...additionalData
-                }, { merge: true });
-                console.log("User data saved successfully.");
-            } catch (error) {
-                console.error("Error saving user data:", error);
-            }
-        };
-        
-        // Sign Up with Email and Password
-        const signupBtn = document.getElementById('signupBtn');
-        signupBtn.addEventListener('click', async () => {
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            authError.textContent = '';
-
-            if (!name || !email || !password) {
-                authError.textContent = 'Please fill out all fields.';
-                return;
-            }
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await saveUserData(userCredential.user, { name });
-                // onAuthStateChanged will handle the redirect
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
-
-        // Log In with Email and Password
-        const loginEmailBtn = document.getElementById('loginEmailBtn');
-        loginEmailBtn.addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            authError.textContent = '';
-
-            if (!email || !password) {
-                authError.textContent = 'Please enter email and password.';
-                return;
-            }
-
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle the redirect
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
-
-        // Sign In with Google
-        const googleSignInBtn = document.getElementById('googleSignInBtn');
-        googleSignInBtn.addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            authError.textContent = '';
-            try {
-                const result = await signInWithPopup(auth, provider);
-                await saveUserData(result.user);
-                // onAuthStateChanged will handle the redirect
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
-
     </script>
 </body>
 </html>
