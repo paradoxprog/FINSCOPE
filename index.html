@@ -9,31 +9,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the Inter font and other minor tweaks */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* A light gray background */
-        }
-        /* Custom scrollbar for a more modern look */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        .feature-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: #f8fafc;
         }
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -42,17 +29,11 @@
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline-block mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12B2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"></path><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4z"></path></svg>
+            <a href="#" class="text-2xl font-bold text-blue-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12B2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"></path><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4z"></path></svg>
                 FINSCOPE
             </a>
-            <div class="hidden md:flex items-center space-x-6">
-                <a href="#features" class="text-gray-600 hover:text-blue-600">Features</a>
-                <a href="#simulation" class="text-gray-600 hover:text-blue-600">Simulate</a>
-                <a href="#chat" class="text-gray-600 hover:text-blue-600">Chat</a>
-                <a href="#security" class="text-gray-600 hover:text-blue-600">Security</a>
-            </div>
-            <button id="getStartedBtnHeader" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">Get Started</button>
+            <button id="loginBtn" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">Login / Sign Up</button>
         </nav>
     </header>
 
@@ -75,88 +56,27 @@
                     <p class="mt-2 text-gray-600">A simple, step-by-step journey to financial clarity.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Feature 1: Onboarding -->
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <!-- Cards are the same as before -->
+                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
                         <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </div>
                         <h3 class="text-xl font-bold mb-2">1. User Onboarding</h3>
-                        <p class="text-gray-600">Securely connect your financial accounts (bank, credit cards, income). We'll gather initial data on your income, expenses, and goals to get started.</p>
+                        <p class="text-gray-600">Securely connect your financial accounts. We'll gather initial data on your income, expenses, and goals to get started.</p>
                     </div>
-
-                    <!-- Feature 2: Create Twin -->
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
                         <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M16.24 7.76A6 6 0 0 0 7.76 16.24"/><path d="M12 18a6 6 0 0 0 0-12"/></svg>
                         </div>
                         <h3 class="text-xl font-bold mb-2">2. Create the Financial Twin</h3>
                         <p class="text-gray-600">Our AI creates your "Financial Twin" based on your unique behavior. It learns how you spend, save, and make financial decisions.</p>
                     </div>
-
-                    <!-- Feature 3: Tracking & Learning -->
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card">
+                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
                         <div class="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 text-purple-600 mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.5 12.5"/><path d="M2 12.5a10 10 0 0 0 18.5-1"/></svg>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">3. Daily Tracking & Learning</h3>
-                        <p class="text-gray-600">The app tracks your financial activity in real-time and continuously learns from new actions, like spending habits or income changes.</p>
-                    </div>
-
-                    <!-- Feature 4: Personalized Advice -->
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 text-yellow-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M15.09 14.09 14.09 15.09"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Z"/><path d="M8.5 8.5c.3-.3.8-.5 1.5-.5s1.2.2 1.5.5c.6.6.2 1.9-1.5 3.4L8 14"/><path d="M12 18h.01"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">4. Personalized Advice</h3>
+                        <h3 class="text-xl font-bold mb-2">3. Personalized Advice</h3>
                         <p class="text-gray-600">Receive real-time, tailored suggestions—like saving tips, spending alerts, or smarter investment ideas—based on your behavior.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Simulation Section -->
-        <section id="simulation" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">5. Simulate Future Scenarios</h2>
-                    <p class="mt-2 text-gray-600">Ask "what if" and see the future impact on your finances instantly.</p>
-                </div>
-                <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-inner">
-                    <label for="scenarioInput" class="block text-lg font-medium text-gray-700">Your "What If" Question:</label>
-                    <div class="mt-2 flex flex-col sm:flex-row gap-4">
-                        <input type="text" id="scenarioInput" class="flex-grow w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., What if I buy a car for $25,000?">
-                        <button id="simulateBtn" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">Simulate</button>
-                    </div>
-                    <div id="simulationResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
-                        <p class="text-gray-500">Your simulation result will appear here...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Chat Section -->
-        <section id="chat" class="py-20">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">6. Chat With Your Twin</h2>
-                    <p class="mt-2 text-gray-600">Talk to your Twin like a smart financial advisor, anytime.</p>
-                </div>
-                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg">
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold">Your Financial Twin</h3>
-                        <p class="text-sm text-green-500 flex items-center"><span class="h-2 w-2 bg-green-500 rounded-full mr-2"></span>Online</p>
-                    </div>
-                    <div id="chatBox" class="p-6 h-80 overflow-y-auto bg-gray-50">
-                        <!-- Chat messages will appear here -->
-                        <div class="flex justify-start mb-4">
-                            <div class="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
-                                Hello! How can I help you with your finances today?
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 border-t flex">
-                        <input type="text" id="chatInput" placeholder="Ask your Twin a question..." class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <button id="sendChatBtn" class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">Send</button>
                     </div>
                 </div>
             </div>
@@ -168,7 +88,7 @@
                  <div class="flex items-center justify-center h-20 w-20 rounded-full bg-blue-200 text-blue-700 mb-4 mx-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">7. Secure & Private By Design</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Secure & Private By Design</h2>
                 <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Your trust is our top priority. All your data is encrypted and protected with bank-level security. You always stay in control of your information.</p>
             </div>
         </section>
@@ -182,182 +102,221 @@
         </div>
     </footer>
     
-    <!-- Onboarding Modal -->
-    <div id="onboardingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md m-4 transform transition-all" id="modalContent">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-900">Welcome to FINSCOPE</h2>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800">&times;</button>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
             </div>
-            <p class="text-gray-600 mb-6">Let's get started by creating your account. Connect your financial life in minutes.</p>
-            <form>
+            
+            <div class="border-b border-gray-200 mt-4">
+                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button id="signupTab" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-active">Sign Up</button>
+                    <button id="loginTab" class="whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">Log In</button>
+                </nav>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signupForm" class="mt-6">
                 <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com">
+                    <label for="signupName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="signupName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="John Doe">
+                </div>
+                <div class="mb-4">
+                    <label for="signupEmail" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="signupEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com">
                 </div>
                 <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
+                    <label for="signupPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="signupPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Create Account</button>
-            </form>
+                <button id="signupBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Create Account</button>
+            </div>
+
+            <!-- Log In Form -->
+            <div id="loginForm" class="mt-6 hidden">
+                <div class="mb-4">
+                    <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="loginEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com">
+                </div>
+                <div class="mb-6">
+                    <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="loginPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
+                </div>
+                <button id="loginEmailBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Log In</button>
+            </div>
+
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">OR</span>
+                </div>
+            </div>
+
+            <button id="googleSignInBtn" class="w-full flex justify-center items-center gap-2 bg-white text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-300">
+                <svg class="w-5 h-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-76.2 74.7C309 93.5 280.7 80 248 80c-82.6 0-150 67.4-150 150s67.4 150 150 150c94.5 0 135.7-77.6 140.8-112.2H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
+                Sign in with Google
+            </button>
+            <p id="authError" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
     </div>
 
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signInAnonymously,
+            signInWithCustomToken
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Modal Logic ---
-            const modal = document.getElementById('onboardingModal');
-            const modalContent = document.getElementById('modalContent');
-            const openModalBtns = [document.getElementById('getStartedBtnHeader'), document.getElementById('getStartedBtnHero')];
-            const closeModalBtn = document.getElementById('closeModalBtn');
+        // --- Firebase Initialization ---
+        // These global variables are provided by the environment.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-            const openModal = () => {
-                modal.classList.remove('hidden');
-                // Simple fade-in animation
-                modalContent.classList.add('scale-100', 'opacity-100');
-                modalContent.classList.remove('scale-95', 'opacity-0');
-            };
-
-            const closeModal = () => {
-                // Simple fade-out animation
-                modalContent.classList.add('scale-95', 'opacity-0');
-                modalContent.classList.remove('scale-100', 'opacity-100');
-                setTimeout(() => modal.classList.add('hidden'), 200);
-            };
-
-            openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
-            closeModalBtn.addEventListener('click', closeModal);
-            // Close modal if clicking outside the content
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    closeModal();
-                }
-            });
-            // Close modal with Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                    closeModal();
-                }
-            });
-
-
-            // --- Simulation Logic ---
-            const simulateBtn = document.getElementById('simulateBtn');
-            const scenarioInput = document.getElementById('scenarioInput');
-            const simulationResult = document.getElementById('simulationResult');
-
-            simulateBtn.addEventListener('click', () => {
-                const query = scenarioInput.value.toLowerCase().trim();
-                let resultHTML = '';
-
-                // Show loading state
-                simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Your Twin is analyzing the scenario...</p>';
-
-                setTimeout(() => {
-                    if (query.includes('car')) {
-                        resultHTML = `
-                            <h4 class="font-bold text-lg text-gray-800">Scenario: Buying a Car</h4>
-                            <p class="mt-2 text-gray-600">Based on your current financial habits, purchasing a car for <strong>$25,000</strong> would:</p>
-                            <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600">
-                                <li>Increase your monthly expenses by approx. <strong>$480</strong> (loan, insurance, fuel).</li>
-                                <li>Decrease your monthly savings rate from <strong>15% to 9%</strong>.</li>
-                                <li>Delay your goal of a house down payment by <strong>18 months</strong>.</li>
-                            </ul>
-                        `;
-                    } else if (query.includes('raise') || query.includes('promotion')) {
-                        resultHTML = `
-                            <h4 class="font-bold text-lg text-gray-800">Scenario: 10% Salary Increase</h4>
-                            <p class="mt-2 text-gray-600">A 10% salary raise would significantly boost your finances:</p>
-                            <ul class="list-disc list-inside mt-2 space-y-1 text-gray-600">
-                                <li>Your net monthly income would increase by approx. <strong>$450</strong>.</li>
-                                <li>If you save 50% of this raise, you could reach your emergency fund goal <strong>8 months sooner</strong>.</li>
-                                <li>This would allow for an additional <strong>$2,700</strong> in investments annually.</li>
-                            </ul>
-                        `;
-                    } else if (query === '') {
-                        resultHTML = '<p class="text-red-500">Please enter a scenario to simulate.</p>';
-                    } else {
-                        resultHTML = `
-                            <h4 class="font-bold text-lg text-gray-800">Scenario Analysis</h4>
-                            <p class="mt-2 text-gray-600">This is a complex scenario. Based on your data, this decision could positively impact your long-term wealth but might strain your short-term cash flow. Consider starting with a smaller investment.</p>
-                        `;
-                    }
-                    simulationResult.innerHTML = resultHTML;
-                }, 1500); // Simulate AI thinking time
-            });
-            
-            // Allow pressing Enter to simulate
-            scenarioInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    simulateBtn.click();
-                }
-            });
-
-
-            // --- Chat Logic ---
-            const chatBox = document.getElementById('chatBox');
-            const chatInput = document.getElementById('chatInput');
-            const sendChatBtn = document.getElementById('sendChatBtn');
-
-            const addMessage = (message, sender) => {
-                const messageDiv = document.createElement('div');
-                const bubbleDiv = document.createElement('div');
-                
-                messageDiv.classList.add('flex', 'mb-4');
-                bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs');
-                bubbleDiv.textContent = message;
-
-                if (sender === 'user') {
-                    messageDiv.classList.add('justify-end');
-                    bubbleDiv.classList.add('bg-blue-600', 'text-white');
-                } else {
-                    messageDiv.classList.add('justify-start');
-                    bubbleDiv.classList.add('bg-gray-200', 'text-gray-800');
-                }
-                
-                messageDiv.appendChild(bubbleDiv);
-                chatBox.appendChild(messageDiv);
-                chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
-            };
-            
-            const getTwinResponse = (userMessage) => {
-                const msg = userMessage.toLowerCase();
-                if (msg.includes('save more')) {
-                    return "A great goal! Based on your spending, you could save an extra $150/month by reducing dining out by 25%. Would you like me to set a budget alert for that category?";
-                } else if (msg.includes('invest')) {
-                    return "Investing is key to long-term growth. Your risk profile suggests a diversified ETF portfolio could be a good start. I can show you some options with low fees.";
-                } else if (msg.includes('retire')) {
-                     return "Based on your current savings rate and investments, you are on track to retire at age 62 with an estimated $1.2M. Increasing your monthly contribution by $300 could move that up to age 60.";
-                } else if (msg.includes('hello') || msg.includes('hi')) {
-                    return "Hello there! What's on your financial mind today?";
-                } else {
-                    return "That's an interesting question. Let me analyze your data... It seems your spending on subscriptions has increased by 15% this quarter. Reviewing these could be a quick way to save.";
-                }
-            };
-
-            const handleChatSend = () => {
-                const userMessage = chatInput.value.trim();
-                if (userMessage === '') return;
-
-                addMessage(userMessage, 'user');
-                chatInput.value = '';
-
-                // Simulate AI typing and response
-                setTimeout(() => {
-                    const twinResponse = getTwinResponse(userMessage);
-                    addMessage(twinResponse, 'twin');
-                }, 1200);
-            };
-
-            sendChatBtn.addEventListener('click', handleChatSend);
-            chatInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    handleChatSend();
-                }
-            });
+        // --- Authentication Logic ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // If user is logged in, redirect to the main application page
+                console.log("User is signed in, redirecting to main.html");
+                window.location.href = 'main.html';
+            } else {
+                console.log("User is signed out.");
+            }
         });
+
+        // --- UI Elements ---
+        const authModal = document.getElementById('authModal');
+        const modalContent = document.getElementById('modalContent');
+        const openModalBtns = [document.getElementById('loginBtn'), document.getElementById('getStartedBtnHero')];
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const signupTab = document.getElementById('signupTab');
+        const loginTab = document.getElementById('loginTab');
+        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
+        const authError = document.getElementById('authError');
+
+        // --- Modal and Tab Logic ---
+        const openModal = () => authModal.classList.remove('hidden');
+        const closeModal = () => authModal.classList.add('hidden');
+
+        openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
+        closeModalBtn.addEventListener('click', closeModal);
+        authModal.addEventListener('click', e => {
+            if (e.target === authModal) closeModal();
+        });
+
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('tab-active');
+            loginTab.classList.remove('tab-active');
+            signupForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            authError.textContent = '';
+        });
+
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('tab-active');
+            signupTab.classList.remove('tab-active');
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            authError.textContent = '';
+        });
+
+        // --- Firebase Auth Functions ---
+
+        // Helper to save user data to Firestore
+        const saveUserData = async (user, additionalData = {}) => {
+            if (!user) return;
+            const userRef = doc(db, `/artifacts/${appId}/users/${user.uid}/profile/data`);
+            try {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || additionalData.name,
+                    createdAt: serverTimestamp(),
+                    ...additionalData
+                }, { merge: true });
+                console.log("User data saved successfully.");
+            } catch (error) {
+                console.error("Error saving user data:", error);
+            }
+        };
+        
+        // Sign Up with Email and Password
+        const signupBtn = document.getElementById('signupBtn');
+        signupBtn.addEventListener('click', async () => {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            authError.textContent = '';
+
+            if (!name || !email || !password) {
+                authError.textContent = 'Please fill out all fields.';
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await saveUserData(userCredential.user, { name });
+                // onAuthStateChanged will handle the redirect
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        // Log In with Email and Password
+        const loginEmailBtn = document.getElementById('loginEmailBtn');
+        loginEmailBtn.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            authError.textContent = '';
+
+            if (!email || !password) {
+                authError.textContent = 'Please enter email and password.';
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle the redirect
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        // Sign In with Google
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        googleSignInBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            authError.textContent = '';
+            try {
+                const result = await signInWithPopup(auth, provider);
+                await saveUserData(result.user);
+                // onAuthStateChanged will handle the redirect
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
     </script>
 </body>
 </html>
