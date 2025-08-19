@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FINSCOPE - Your Dashboard</title>
+    <title>FINSCOPE - Your AI Financial Twin</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,146 +17,180 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* Light gray background */
+            background-color: #0a0a0a; /* Darker background */
+            color: #f5f5f5;
         }
         .gradient-text {
             background: linear-gradient(90deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Simple loading spinner */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid #3498db;
-            width: 30px;
-            height: 30px;
-            -webkit-animation: spin 2s linear infinite; /* Safari */
-            animation: spin 2s linear infinite;
-            margin: 20px auto;
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        @-webkit-keyframes spin {
-          0% { -webkit-transform: rotate(0deg); }
-          100% { -webkit-transform: rotate(360deg); }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+<body class="antialiased">
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="./index.html" class="flex items-center text-2xl font-bold tracking-wider">
+            <a href="#" class="flex items-center text-2xl font-bold tracking-wider">
                 <img src="logo.jpg" alt="FINSCOPE Logo" class="h-8 w-8 mr-2 rounded-full">
                 <span class="gradient-text">FINSCOPE</span>
             </a>
-            <div id="user-nav" class="hidden items-center space-x-4">
-                 <p id="user-greeting" class="text-gray-600 hidden sm:block"></p>
+            <nav class="hidden md:flex items-center space-x-4" id="nav-default">
+                <button id="login-btn" class="text-gray-300 hover:text-white transition-colors">Login</button>
+                <button id="signup-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Sign Up
+                </button>
+            </nav>
+            <div class="hidden items-center space-x-4" id="nav-authenticated">
+                 <p id="user-greeting" class="text-gray-300"></p>
                  <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
                     Logout
+                </button>
+            </div>
+            <button class="md:hidden text-white" id="mobile-menu-button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden" id="mobile-menu">
+            <div class="px-6 pt-2 pb-4 space-y-2 text-center">
+                <button id="mobile-login-btn" class="block w-full text-gray-300 hover:text-white transition-colors py-2">Login</button>
+                <button id="mobile-signup-btn" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Sign Up
                 </button>
             </div>
         </div>
     </header>
 
     <main>
-        <!-- 1. Financial Input Section -->
-        <section id="financial-input" class="py-20 bg-white">
+        <!-- Hero Section -->
+        <section class="pt-32 pb-20 text-center bg-grid-pattern">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+                    Meet Your <span class="gradient-text">AI Financial Twin</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+                    Simulate your financial future, get personalized advice, and achieve your goals with a digital version of you.
+                </p>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 bg-black/20">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Your Financial Profile</h2>
-                    <p class="mt-2 text-gray-600">Provide your details to get personalized AI-powered advice.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-3">How FINSCOPE Works</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">A simple, step-by-step journey to financial clarity.</p>
                 </div>
-                <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-inner">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="monthlyIncome" class="block text-sm font-medium text-gray-700">Monthly Income (after tax)</label>
-                            <input type="number" id="monthlyIncome" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="3000">
-                        </div>
-                        <div>
-                            <label for="currentSavings" class="block text-sm font-medium text-gray-700">Current Savings</label>
-                            <input type="number" id="currentSavings" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="10000">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Monthly Expenses</label>
-                            <div class="grid grid-cols-2 gap-4 mt-1">
-                                <input type="number" id="housing" class="w-full p-2 border rounded-md" placeholder="Housing">
-                                <input type="number" id="food" class="w-full p-2 border rounded-md" placeholder="Food">
-                                <input type="number" id="transport" class="w-full p-2 border rounded-md" placeholder="Transport">
-                                <input type="number" id="other" class="w-full p-2 border rounded-md" placeholder="Other">
-                            </div>
-                        </div>
-                         <div class="md:col-span-2">
-                            <label for="financialGoals" class="block text-sm font-medium text-gray-700">Financial Goals</label>
-                            <textarea id="financialGoals" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Buy a house in 5 years, save for retirement, pay off debt."></textarea>
-                        </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Step 1 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">1</div>
+                        <h3 class="text-xl font-semibold mb-2">User Onboarding</h3>
+                        <p class="text-gray-400">
+                            Securely connect your financial accounts. We'll gather initial data on your income, expenses, and goals to get started.
+                        </p>
                     </div>
-                    <button id="analyzeBtn" class="mt-6 w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Save & Analyze Profile</button>
-                    <div id="analysisResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
-                        <p class="text-gray-500">Your financial analysis will appear here...</p>
+                    <!-- Step 2 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">2</div>
+                        <h3 class="text-xl font-semibold mb-2">Create the Financial Twin</h3>
+                        <p class="text-gray-400">
+                            Our AI creates your "Financial Twin" based on your unique behavior. It learns how you spend, save, and make financial decisions.
+                        </p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">3</div>
+                        <h3 class="text-xl font-semibold mb-2">Personalized Advice</h3>
+                        <p class="text-gray-400">
+                            Receive real-time, tailored suggestions—like saving tips, spending alerts, or smarter investment ideas—based on your behavior.
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. "What If?" Simulation Section -->
-        <section id="simulation" class="py-20">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Simulate Future Scenarios</h2>
-                    <p class="mt-2 text-gray-600">Ask "what if" and see the future impact on your finances instantly.</p>
-                </div>
-                <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-inner">
-                    <label for="scenarioInput" class="block text-lg font-medium text-gray-700">Your "What If" Question:</label>
-                    <div class="mt-2 flex flex-col sm:flex-row gap-4">
-                        <input type="text" id="scenarioInput" class="flex-grow w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., What if I get a 10% raise?" disabled>
-                        <button id="simulateBtn" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50" disabled>Simulate</button>
-                    </div>
-                    <div id="simulationResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
-                        <p class="text-gray-500">Your simulation result will appear here...</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. Chat Section -->
-        <section id="chat" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Chat With Your Twin</h2>
-                    <p class="mt-2 text-gray-600">Talk to your Twin like a smart financial advisor, anytime.</p>
-                </div>
-                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg">
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold">Your Financial Twin</h3>
-                        <p class="text-sm text-green-500 flex items-center"><span class="h-2 w-2 bg-green-500 rounded-full mr-2"></span>Online</p>
-                    </div>
-                    <div id="chatBox" class="p-6 h-80 overflow-y-auto bg-gray-50">
-                        <div class="flex justify-start mb-4">
-                            <div class="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
-                                Hello! Please fill out your financial profile above to get started. Once that's done, I can help you with any questions.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4 border-t flex">
-                        <input type="text" id="chatInput" placeholder="Ask your Twin a question..." class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" disabled>
-                        <button id="sendChatBtn" class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors disabled:opacity-50" disabled>Send</button>
-                    </div>
-                </div>
+        <!-- Security Section -->
+        <section class="py-20">
+            <div class="container mx-auto px-6 text-center">
+                 <div class="flex justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5.002L2 15.854a2 2 0 002 2h12a2 2 0 002-2V5.002A11.954 11.954 0 0110 1.944zM10 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 4zm0 6.5a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                    </svg>
+                 </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Secure & Private By Design</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Your trust is our top priority. All your data is encrypted and protected with bank-level security. You always stay in control of your information.
+                </p>
             </div>
         </section>
     </main>
 
+    <!-- Footer -->
+    <footer class="border-t border-gray-800">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p class="font-bold text-lg mb-2 gradient-text">FINSCOPE</p>
+            <p class="mb-4">Your Financial Future, Simulated.</p>
+            <p class="text-sm">&copy; 2024 FINSCOPE. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- Login/Signup Modal -->
+    <div id="auth-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-md p-8 rounded-2xl shadow-2xl m-4 relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
+            <h2 id="modal-title" class="text-2xl font-bold text-center mb-4">Login to FINSCOPE</h2>
+            <div class="space-y-4">
+                 <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.686 44 24c0-1.341-.138-2.65-.389-3.917z"/></g></svg>
+                    Continue with Google
+                </button>
+                <div class="flex items-center text-center">
+                    <hr class="flex-grow border-gray-600">
+                    <span class="px-4 text-gray-500">OR</span>
+                    <hr class="flex-grow border-gray-600">
+                </div>
+                <form id="email-form" class="space-y-4">
+                    <input type="email" placeholder="Email Address" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <button type="submit" id="email-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                        Continue
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            signOut,
+            onAuthStateChanged,
+            signInAnonymously,
+            signInWithCustomToken
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURATION ---
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
             authDomain: "finscope-282b3.firebaseapp.com",
@@ -166,249 +200,115 @@
             appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
             measurementId: "G-R8GE51ZT8J"
         };
-        
-        // =================================================================================
-        // IMPORTANT: YOU MUST REPLACE THE PLACEHOLDER KEY BELOW WITH YOUR OWN API KEY
-        // Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
-        // =================================================================================
-        const GEMINI_API_KEY = "AIzaSyBhwzlZShzqrPbxMY0y4qftB-0EpDhV-zk"; 
-        
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
-        // --- INITIALIZATION ---
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        // --- DOM ELEMENTS ---
-        const userNav = document.getElementById('user-nav');
-        const userGreeting = document.getElementById('user-greeting');
+        // DOM Elements
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const mobileSignupBtn = document.getElementById('mobile-signup-btn');
         const logoutBtn = document.getElementById('logout-btn');
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
         
-        // Financial Profile
-        const monthlyIncome = document.getElementById('monthlyIncome');
-        const currentSavings = document.getElementById('currentSavings');
-        const housing = document.getElementById('housing');
-        const food = document.getElementById('food');
-        const transport = document.getElementById('transport');
-        const other = document.getElementById('other');
-        const financialGoals = document.getElementById('financialGoals');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const analysisResult = document.getElementById('analysisResult');
+        const authModal = document.getElementById('auth-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const emailForm = document.getElementById('email-form');
+        const emailSubmitBtn = document.getElementById('email-submit-btn');
 
-        // Simulation
-        const scenarioInput = document.getElementById('scenarioInput');
-        const simulateBtn = document.getElementById('simulateBtn');
-        const simulationResult = document.getElementById('simulationResult');
+        const navDefault = document.getElementById('nav-default');
+        const navAuthenticated = document.getElementById('nav-authenticated');
+        const userGreeting = document.getElementById('user-greeting');
+        
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-        // Chat
-        const chatBox = document.getElementById('chatBox');
-        const chatInput = document.getElementById('chatInput');
-        const sendChatBtn = document.getElementById('sendChatBtn');
+        // --- Modal Logic ---
+        const openModal = (isSignUp = false) => {
+            modalTitle.textContent = isSignUp ? 'Create an Account' : 'Login to FINSCOPE';
+            emailSubmitBtn.textContent = isSignUp ? 'Sign Up' : 'Login';
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+        };
 
-        // --- STATE ---
-        let userFinancialProfile = null;
-        let chatHistory = [];
+        const closeModal = () => {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+        };
 
-        // --- AUTHENTICATION ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userNav.classList.remove('hidden');
-                userNav.classList.add('flex');
-                userGreeting.textContent = `Hello, ${user.displayName || user.email}`;
-            } else {
-                window.location.href = './index.html'; 
+        // --- Event Listeners ---
+        loginBtn.addEventListener('click', () => openModal(false));
+        signupBtn.addEventListener('click', () => openModal(true));
+        mobileLoginBtn.addEventListener('click', () => {
+            openModal(false);
+            mobileMenu.classList.add('hidden');
+        });
+        mobileSignupBtn.addEventListener('click', () => {
+            openModal(true);
+            mobileMenu.classList.add('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                closeModal();
             }
+        });
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Firebase Authentication ---
+        googleSignInBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // The onAuthStateChanged observer will handle the redirect.
+                    console.log("Signed in with Google:", result.user);
+                    closeModal();
+                }).catch((error) => {
+                    console.error("Google Sign-In Error:", error);
+                });
         });
 
         logoutBtn.addEventListener('click', () => {
-            signOut(auth).catch((error) => console.error('Sign Out Error', error));
+            signOut(auth).then(() => {
+                console.log("User signed out.");
+            }).catch((error) => {
+                console.error("Sign Out Error:", error);
+            });
         });
 
-        // --- GEMINI API HELPER with Exponential Backoff ---
-        async function callGemini(prompt, retries = 3, delay = 1000) {
-            if (GEMINI_API_KEY === "AIzaSyAdbjm2hDR-hciT5-V-by7WyvPJe-6-Y-M") {
-                 return `<p class="text-red-500"><strong>Configuration Error:</strong> Please replace the placeholder API key in the script with your actual Gemini API key from Google AI Studio.</p>`;
-            }
-            try {
-                const response = await fetch(GEMINI_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                if (!response.ok) {
-                    if (response.status === 429 && retries > 0) { // Rate limited
-                        await new Promise(res => setTimeout(res, delay));
-                        return callGemini(prompt, retries - 1, delay * 2); 
-                    }
-                    const errorData = await response.json();
-                    throw new Error(errorData.error.message || `API call failed with status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.candidates && data.candidates.length > 0) {
-                    let rawText = data.candidates[0].content.parts[0].text;
-                    
-                    // Clean the response: The model sometimes prefixes the response with "html" or markdown fences.
-                    let cleanedText = rawText.trim();
-                    if (cleanedText.startsWith('```html')) {
-                        cleanedText = cleanedText.substring(7);
-                        if (cleanedText.endsWith('```')) {
-                            cleanedText = cleanedText.slice(0, -3);
-                        }
-                    } else if (cleanedText.toLowerCase().startsWith('html')) {
-                        cleanedText = cleanedText.substring(4);
-                    }
-                    
-                    return cleanedText.trim();
-                } else {
-                    return "I'm not sure how to respond to that. Could you try rephrasing?";
-                }
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                if (retries > 0) {
-                    await new Promise(res => setTimeout(res, delay));
-                    return callGemini(prompt, retries - 1, delay * 2);
-                }
-                return `Sorry, I encountered an error after several retries: ${error.message}`;
-            }
-        }
-        
-        // --- FEATURE LOGIC ---
-
-        // 1. Financial Profile Analysis
-        analyzeBtn.addEventListener('click', async () => {
-            const profile = {
-                income: monthlyIncome.value,
-                savings: currentSavings.value,
-                expenses: {
-                    housing: housing.value,
-                    food: food.value,
-                    transport: transport.value,
-                    other: other.value
-                },
-                goals: financialGoals.value
-            };
-
-            if (!profile.income || !profile.savings || !profile.goals) {
-                analysisResult.innerHTML = `<p class="text-red-500">Please fill in all required fields: Income, Savings, and Goals.</p>`;
-                return;
-            }
-
-            userFinancialProfile = profile;
-            analysisResult.innerHTML = '<div class="loader"></div>';
-            analyzeBtn.disabled = true;
-
-            const prompt = `
-                Analyze the following financial profile. Provide a concise summary of their financial health, 
-                followed by 3 actionable, personalized recommendations in a bulleted list.
-
-                **Profile:**
-                - Monthly Income (after tax): $${profile.income}
-                - Current Savings: $${profile.savings}
-                - Monthly Expenses: Housing: $${profile.expenses.housing || 0}, Food: $${profile.expenses.food || 0}, Transport: $${profile.expenses.transport || 0}, Other: $${profile.expenses.other || 0}
-                - Financial Goals: "${profile.goals}"
-
-                Format the response in simple HTML (e.g., <p>, <strong>, <ul>, <li>).
-            `;
-
-            const result = await callGemini(prompt);
-            analysisResult.innerHTML = result;
-            analyzeBtn.disabled = false;
-
-            if (!result.toLowerCase().includes('error')) {
-                scenarioInput.disabled = false;
-                simulateBtn.disabled = false;
-                chatInput.disabled = false;
-                sendChatBtn.disabled = false;
-            }
+        // Dummy handler for email form
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real app, you would handle email/password sign-in/sign-up here.
+            // For this demo, we'll just log it and assume success.
+            console.log("Email form submitted. Implement Firebase email auth here.");
+            // A real implementation would trigger onAuthStateChanged on success.
+            // For now, we manually redirect, but the observer is the better pattern.
+            window.location.href = 'main.html';
         });
 
-        // 2. Simulation
-        simulateBtn.addEventListener('click', async () => {
-            const scenario = scenarioInput.value;
-            if (!scenario || !userFinancialProfile) return;
-
-            simulationResult.innerHTML = '<div class="loader"></div>';
-            simulateBtn.disabled = true;
-
-            const prompt = `
-                Given the user's financial profile:
-                - Monthly Income: $${userFinancialProfile.income}
-                - Current Savings: $${userFinancialProfile.savings}
-                - Monthly Expenses Total: $${Object.values(userFinancialProfile.expenses).reduce((a, b) => Number(a) + Number(b), 0)}
-                - Goals: "${userFinancialProfile.goals}"
-
-                Simulate the financial impact of this scenario: "${scenario}".
-                
-                Provide a brief, clear analysis of the potential outcome in simple HTML.
-            `;
-            
-            const result = await callGemini(prompt);
-            simulationResult.innerHTML = result;
-            simulateBtn.disabled = false;
-        });
-
-        // 3. Chat
-        const handleSendChat = async () => {
-            const message = chatInput.value.trim();
-            if (!message || !userFinancialProfile) return;
-
-            addMessageToChatbox(message, 'user');
-            chatInput.value = '';
-            sendChatBtn.disabled = true;
-
-            chatHistory.push({ role: 'user', parts: [{ text: message }] });
-
-            const prompt = `
-                You are a helpful AI financial advisor, a "Financial Twin".
-                User's profile:
-                - Income: $${userFinancialProfile.income}/month
-                - Savings: $${userFinancialProfile.savings}
-                - Goals: "${userFinancialProfile.goals}"
-
-                Conversation history is provided below. Respond to the last user message. Be conversational and concise.
-                ${chatHistory.map(msg => `${msg.role}: ${msg.parts[0].text}`).join('\n')}
-            `;
-
-            const result = await callGemini(prompt);
-            
-            addMessageToChatbox(result, 'ai');
-            chatHistory.push({ role: 'model', parts: [{ text: result }] });
-            sendChatBtn.disabled = false;
-
-            if (chatHistory.length > 10) {
-                chatHistory = chatHistory.slice(-10);
-            }
-        };
-
-        sendChatBtn.addEventListener('click', handleSendChat);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSendChat();
-            }
-        });
-
-        function addMessageToChatbox(text, sender) {
-            const messageWrapper = document.createElement('div');
-            const messageBubble = document.createElement('div');
-            
-            messageWrapper.classList.add('flex', 'mb-4');
-            messageBubble.classList.add('p-3', 'rounded-lg', 'max-w-xs');
-
-            if (sender === 'user') {
-                messageWrapper.classList.add('justify-end');
-                messageBubble.classList.add('bg-blue-500', 'text-white');
+        // --- Auth State Observer ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in, redirect to the main application page.
+                window.location.href = 'main.html';
             } else {
-                messageWrapper.classList.add('justify-start');
-                messageBubble.classList.add('bg-gray-200', 'text-gray-800');
+                // User is signed out, ensure the UI is in the logged-out state.
+                console.log("User is signed out.");
+                navDefault.classList.remove('md:hidden');
+                navDefault.classList.add('md:flex');
+                navAuthenticated.classList.add('hidden');
+                navAuthenticated.classList.remove('flex');
+                userGreeting.textContent = '';
             }
-            
-            messageBubble.innerHTML = text; // Use innerHTML to render HTML from API
-            messageWrapper.appendChild(messageBubble);
-            chatBox.appendChild(messageWrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        });
 
     </script>
 </body>
