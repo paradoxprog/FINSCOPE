@@ -50,7 +50,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold tracking-wider gradient-text">FINSCOPE</a>
+            <a href="./index.html" class="text-2xl font-bold tracking-wider gradient-text">FINSCOPE</a>
             <div id="user-nav" class="hidden items-center space-x-4">
                  <p id="user-greeting" class="text-gray-600 hidden sm:block"></p>
                  <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
@@ -209,7 +209,7 @@
                 userNav.classList.add('flex');
                 userGreeting.textContent = `Hello, ${user.displayName || user.email}`;
             } else {
-                window.location.href = 'index.html'; 
+                window.location.href = './index.html'; 
             }
         });
 
