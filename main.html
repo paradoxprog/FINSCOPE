@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINSCOPE - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-blue-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12B2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"></path><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4z"></path></svg>
+                FINSCOPE
+            </a>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-gray-600 font-medium"></span>
+                <button id="logoutBtn" class="bg-red-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-red-600 transition-colors">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Simulation Section -->
+        <section id="simulation" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Simulate Future Scenarios</h2>
+                    <p class="mt-2 text-gray-600">Ask "what if" and see the future impact on your finances instantly.</p>
+                </div>
+                <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-inner">
+                    <label for="scenarioInput" class="block text-lg font-medium text-gray-700">Your "What If" Question:</label>
+                    <div class="mt-2 flex flex-col sm:flex-row gap-4">
+                        <input type="text" id="scenarioInput" class="flex-grow w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., What if I buy a car for $25,000?">
+                        <button id="simulateBtn" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">Simulate</button>
+                    </div>
+                    <div id="simulationResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
+                        <p class="text-gray-500">Your simulation result will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chat" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Chat With Your Twin</h2>
+                    <p class="mt-2 text-gray-600">Talk to your Twin like a smart financial advisor, anytime.</p>
+                </div>
+                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg">
+                    <div class="p-4 border-b">
+                        <h3 class="text-lg font-semibold">Your Financial Twin</h3>
+                        <p class="text-sm text-green-500 flex items-center"><span class="h-2 w-2 bg-green-500 rounded-full mr-2"></span>Online</p>
+                    </div>
+                    <div id="chatBox" class="p-6 h-80 overflow-y-auto bg-gray-50">
+                        <div class="flex justify-start mb-4">
+                            <div class="bg-gray-200 text-gray-800 p-3 rounded-lg max-w-xs">
+                                Hello! How can I help you with your finances today?
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t flex">
+                        <input type="text" id="chatInput" placeholder="Ask your Twin a question..." class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <button id="sendChatBtn" class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2024 FINSCOPE. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Firebase Initialization ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- Auth State Management ---
+        const userDisplay = document.getElementById('user-display');
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // User is signed in.
+                userDisplay.textContent = user.displayName || user.email;
+            } else {
+                // No user is signed in, redirect to the landing page.
+                window.location.href = './index.html';
+            }
+        });
+
+        // --- Logout ---
+        const logoutBtn = document.getElementById('logoutBtn');
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // The onAuthStateChanged listener will handle the redirect.
+            } catch (error) {
+                console.error("Error signing out:", error);
+            }
+        });
+
+        // --- Simulation & Chat Logic (Copied from original file) ---
+        // --- Simulation Logic ---
+        const simulateBtn = document.getElementById('simulateBtn');
+        const scenarioInput = document.getElementById('scenarioInput');
+        const simulationResult = document.getElementById('simulationResult');
+
+        simulateBtn.addEventListener('click', () => {
+            const query = scenarioInput.value.toLowerCase().trim();
+            let resultHTML = '';
+            simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Your Twin is analyzing the scenario...</p>';
+            setTimeout(() => {
+                if (query.includes('car')) {
+                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario: Buying a Car</h4><p class="mt-2 text-gray-600">Based on your current financial habits, purchasing a car for <strong>$25,000</strong> would:</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>Increase your monthly expenses by approx. <strong>$480</strong>.</li><li>Decrease your monthly savings rate from <strong>15% to 9%</strong>.</li><li>Delay your goal of a house down payment by <strong>18 months</strong>.</li></ul>`;
+                } else if (query.includes('raise') || query.includes('promotion')) {
+                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario: 10% Salary Increase</h4><p class="mt-2 text-gray-600">A 10% salary raise would significantly boost your finances:</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>Your net monthly income would increase by approx. <strong>$450</strong>.</li><li>If you save 50% of this raise, you could reach your emergency fund goal <strong>8 months sooner</strong>.</li></ul>`;
+                } else if (query === '') {
+                    resultHTML = '<p class="text-red-500">Please enter a scenario to simulate.</p>';
+                } else {
+                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario Analysis</h4><p class="mt-2 text-gray-600">This decision could positively impact your long-term wealth but might strain your short-term cash flow.</p>`;
+                }
+                simulationResult.innerHTML = resultHTML;
+            }, 1500);
+        });
+        scenarioInput.addEventListener('keydown', e => { if (e.key === 'Enter') simulateBtn.click(); });
+
+        // --- Chat Logic ---
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+
+        const addMessage = (message, sender) => {
+            const messageDiv = document.createElement('div');
+            const bubbleDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'mb-4');
+            bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs');
+            bubbleDiv.textContent = message;
+            if (sender === 'user') {
+                messageDiv.classList.add('justify-end');
+                bubbleDiv.classList.add('bg-blue-600', 'text-white');
+            } else {
+                messageDiv.classList.add('justify-start');
+                bubbleDiv.classList.add('bg-gray-200', 'text-gray-800');
+            }
+            messageDiv.appendChild(bubbleDiv);
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+        
+        const getTwinResponse = (userMessage) => {
+            const msg = userMessage.toLowerCase();
+            if (msg.includes('save more')) return "Based on your spending, you could save an extra $150/month by reducing dining out by 25%.";
+            if (msg.includes('invest')) return "Your risk profile suggests a diversified ETF portfolio could be a good start.";
+            if (msg.includes('retire')) return "You are on track to retire at age 62. Increasing your monthly contribution by $300 could move that up to age 60.";
+            return "That's an interesting question. Let me analyze your data... Your spending on subscriptions has increased by 15% this quarter.";
+        };
+
+        const handleChatSend = () => {
+            const userMessage = chatInput.value.trim();
+            if (userMessage === '') return;
+            addMessage(userMessage, 'user');
+            chatInput.value = '';
+            setTimeout(() => addMessage(getTwinResponse(userMessage), 'twin'), 1200);
+        };
+
+        sendChatBtn.addEventListener('click', handleChatSend);
+        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleChatSend(); });
+    </script>
+</body>
+</html>
