@@ -3,43 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FINSCOPE - Dashboard</title>
+    <title>FINSCOPE - Your Dashboard</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Custom CSS for theme and animations -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f8fafc; /* Light gray background */
         }
-        .blinking-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 1rem;
-            background-color: #333;
-            animation: blink 1s step-end infinite;
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        @keyframes blink {
-            from, to { background-color: transparent }
-            50% { background-color: #333; }
+        /* Simple loading spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            -webkit-animation: spin 2s linear infinite; /* Safari */
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @-webkit-keyframes spin {
+          0% { -webkit-transform: rotate(0deg); }
+          100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="antialiased text-gray-800">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold text-blue-600 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12B2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"></path><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4z"></path></svg>
-                FINSCOPE
-            </a>
-            <div class="flex items-center gap-4">
-                <span id="user-display" class="text-gray-600 font-medium"></span>
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold tracking-wider gradient-text">FINSCOPE</a>
+            <div id="user-nav" class="hidden items-center space-x-4">
+                 <p id="user-greeting" class="text-gray-600 hidden sm:block"></p>
+                 <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Logout
+                </button>
             </div>
-        </nav>
+        </div>
     </header>
 
     <main>
@@ -74,7 +92,7 @@
                             <textarea id="financialGoals" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Buy a house in 5 years, save for retirement, pay off debt."></textarea>
                         </div>
                     </div>
-                    <button id="analyzeBtn" class="mt-6 w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50" disabled>Save & Analyze Profile</button>
+                    <button id="analyzeBtn" class="mt-6 w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Save & Analyze Profile</button>
                     <div id="analysisResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
                         <p class="text-gray-500">Your financial analysis will appear here...</p>
                     </div>
@@ -130,227 +148,248 @@
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2024 FINSCOPE. All rights reserved.</p>
-        </div>
-    </footer>
-
+    <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- Global State ---
-        let userFinancialProfile = null;
-        let db;
-        let currentUserId;
-        let appId;
+        // --- CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
+            authDomain: "finscope-282b3.firebaseapp.com",
+            projectId: "finscope-282b3",
+            storageBucket: "finscope-282b3.firebasestorage.app",
+            messagingSenderId: "838937656151",
+            appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
+            measurementId: "G-R8GE51ZT8J"
+        };
+        
+        // The API key is left as an empty string.
+        // The Canvas environment will automatically provide it during runtime.
+        const GEMINI_API_KEY = ""; 
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
-        // --- UI Element References ---
-        const userDisplay = document.getElementById('user-display');
+        // --- INITIALIZATION ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- DOM ELEMENTS ---
+        const userNav = document.getElementById('user-nav');
+        const userGreeting = document.getElementById('user-greeting');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        // Financial Profile
+        const monthlyIncome = document.getElementById('monthlyIncome');
+        const currentSavings = document.getElementById('currentSavings');
+        const housing = document.getElementById('housing');
+        const food = document.getElementById('food');
+        const transport = document.getElementById('transport');
+        const other = document.getElementById('other');
+        const financialGoals = document.getElementById('financialGoals');
         const analyzeBtn = document.getElementById('analyzeBtn');
         const analysisResult = document.getElementById('analysisResult');
-        const simulateBtn = document.getElementById('simulateBtn');
+
+        // Simulation
         const scenarioInput = document.getElementById('scenarioInput');
+        const simulateBtn = document.getElementById('simulateBtn');
         const simulationResult = document.getElementById('simulationResult');
+
+        // Chat
+        const chatBox = document.getElementById('chatBox');
         const chatInput = document.getElementById('chatInput');
         const sendChatBtn = document.getElementById('sendChatBtn');
-        const chatBox = document.getElementById('chatBox');
-        
-        // --- Main Application Logic ---
-        try {
-            const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-            const firebaseConfig = JSON.parse(firebaseConfigString);
-            
-            if (!firebaseConfig.apiKey) {
-                throw new Error("Firebase configuration is missing or invalid. Cannot connect to services.");
-            }
-            
-            appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.appId;
-            if (!appId) {
-                throw new Error("Application ID is missing.");
-            }
-            
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            db = getFirestore(app);
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    currentUserId = user.uid;
-                    userDisplay.textContent = `Welcome, ${user.displayName || user.email}!`;
-                    await loadFinancialProfile();
-                    enableAllInputs();
-                } else {
-                    window.location.href = 'index.html';
-                }
-            });
-        } catch (error) {
-            console.error("Fatal Error during initialization:", error);
-            document.body.innerHTML = `<div class="text-center p-8 text-red-500">
-                <h1 class="text-2xl font-bold">Application Error</h1>
-                <p>Could not initialize the application. Please check the console for details.</p>
-                <p class="text-sm mt-2">Error: ${error.message}</p>
-            </div>`;
-        }
-        
-        // --- Gemini API Integration ---
-        const apiKey = "AIzaSyCQpluFQok4C0jkqbQIMRKat434aF4zvXY";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        // --- STATE ---
+        let userFinancialProfile = null;
+        let chatHistory = [];
 
-        async function callGemini(prompt) {
-             const payload = { contents: [{ parts: [{ text: prompt }] }] };
-             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-             if (!response.ok) {
-                  const errorBody = await response.json();
-                  console.error("API Error:", errorBody);
-                  return `Error: ${errorBody.error.message}`;
-             }
-             const result = await response.json();
-             return result.candidates[0]?.content?.parts[0]?.text || "Sorry, I couldn't get a response.";
-        }
-
-        // --- Feature 1: Financial Profile Logic ---
-        const financialInputs = {
-            monthlyIncome: document.getElementById('monthlyIncome'),
-            currentSavings: document.getElementById('currentSavings'),
-            housing: document.getElementById('housing'),
-            food: document.getElementById('food'),
-            transport: document.getElementById('transport'),
-            other: document.getElementById('other'),
-            financialGoals: document.getElementById('financialGoals')
-        };
-
-        async function saveFinancialProfile() {
-            if (!currentUserId || !appId) return;
-            const profileData = {
-                monthlyIncome: financialInputs.monthlyIncome.value,
-                currentSavings: financialInputs.currentSavings.value,
-                expenses: {
-                    housing: financialInputs.housing.value,
-                    food: financialInputs.food.value,
-                    transport: financialInputs.transport.value,
-                    other: financialInputs.other.value,
-                },
-                financialGoals: financialInputs.financialGoals.value
-            };
-            const profileRef = doc(db, `/artifacts/${appId}/users/${currentUserId}/financialProfile/data`);
-            try {
-                await setDoc(profileRef, profileData, { merge: true });
-                userFinancialProfile = profileData;
-                return profileData;
-            } catch (error) {
-                console.error("Error saving financial profile:", error);
-                analysisResult.innerHTML = `<p class="text-red-500">Error: Could not save your profile. Please check the console for details.</p>`;
-            }
-        }
-
-        async function loadFinancialProfile() {
-            if (!currentUserId || !appId) return;
-            const profileRef = doc(db, `/artifacts/${appId}/users/${currentUserId}/financialProfile/data`);
-            try {
-                const docSnap = await getDoc(profileRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    userFinancialProfile = data;
-                    financialInputs.monthlyIncome.value = data.monthlyIncome || '';
-                    financialInputs.currentSavings.value = data.currentSavings || '';
-                    financialInputs.housing.value = data.expenses?.housing || '';
-                    financialInputs.food.value = data.expenses?.food || '';
-                    financialInputs.transport.value = data.expenses?.transport || '';
-                    financialInputs.other.value = data.expenses?.other || '';
-                    financialInputs.financialGoals.value = data.financialGoals || '';
-                }
-            } catch (error) {
-                console.error("Error loading financial profile:", error);
-            }
-        }
-
-        async function handleAnalysis() {
-            analysisResult.innerHTML = '<p class="text-gray-500 animate-pulse">Analyzing your profile...</p>';
-            const profileData = await saveFinancialProfile();
-            if (!profileData) return;
-            const prompt = `Analyze the following financial profile and provide a concise summary of the user's financial health, along with 3 actionable tips. Be encouraging and clear. Profile: ${JSON.stringify(profileData)}`;
-            const resultText = await callGemini(prompt);
-            analysisResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
-        }
-
-        // --- Feature 2: Simulation Logic ---
-        async function handleSimulation() {
-            const query = scenarioInput.value.trim();
-            if (query === '') {
-                simulationResult.innerHTML = '<p class="text-red-500">Please enter a scenario.</p>';
-                return;
-            }
-            if (!userFinancialProfile) {
-                simulationResult.innerHTML = '<p class="text-red-500">Please save your financial profile first.</p>';
-                return;
-            }
-            simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Simulating scenario...</p>';
-            const prompt = `Given this financial profile: ${JSON.stringify(userFinancialProfile)}. Now, analyze this "what-if" scenario: "${query}". Provide a clear, concise analysis with bullet points on the potential impact.`;
-            const resultText = await callGemini(prompt);
-            simulationResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
-        }
-
-        // --- Feature 3: Chat Logic ---
-        const addMessage = (message, sender) => {
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'mb-4');
-            if (sender === 'user') {
-                bubbleDiv.classList.add('bg-blue-600', 'text-white', 'self-end');
-                bubbleDiv.textContent = message;
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userNav.classList.remove('hidden');
+                userNav.classList.add('flex');
+                userGreeting.textContent = `Hello, ${user.displayName || user.email}`;
             } else {
-                bubbleDiv.classList.add('bg-gray-200', 'text-gray-800', 'self-start');
-                bubbleDiv.innerHTML = message;
+                window.location.href = 'index.html'; 
             }
-            chatBox.appendChild(bubbleDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
+        });
 
-        async function handleChatSend() {
-            const userMessage = chatInput.value.trim();
-            if (userMessage === '') return;
-            if (!userFinancialProfile) {
-                addMessage("Please save your financial profile before we can chat!", 'twin');
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).catch((error) => console.error('Sign Out Error', error));
+        });
+
+        // --- GEMINI API HELPER with Exponential Backoff ---
+        async function callGemini(prompt, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                if (!response.ok) {
+                    // Handle specific HTTP error codes if needed
+                    if (response.status === 429 && retries > 0) { // Rate limited
+                        await new Promise(res => setTimeout(res, delay));
+                        return callGemini(prompt, retries - 1, delay * 2); // Retry with double the delay
+                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || `API call failed with status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.candidates && data.candidates.length > 0) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    // Handle cases where the response is successful but has no content
+                    return "I'm not sure how to respond to that. Could you try rephrasing?";
+                }
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                if (retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return callGemini(prompt, retries - 1, delay * 2);
+                }
+                return `Sorry, I encountered an error after several retries: ${error.message}`;
+            }
+        }
+        
+        // --- FEATURE LOGIC ---
+
+        // 1. Financial Profile Analysis
+        analyzeBtn.addEventListener('click', async () => {
+            const profile = {
+                income: monthlyIncome.value,
+                savings: currentSavings.value,
+                expenses: {
+                    housing: housing.value,
+                    food: food.value,
+                    transport: transport.value,
+                    other: other.value
+                },
+                goals: financialGoals.value
+            };
+
+            if (!profile.income || !profile.savings || !profile.goals) {
+                analysisResult.innerHTML = `<p class="text-red-500">Please fill in all required fields: Income, Savings, and Goals.</p>`;
                 return;
             }
-            addMessage(userMessage, 'user');
+
+            userFinancialProfile = profile;
+            analysisResult.innerHTML = '<div class="loader"></div>';
+            analyzeBtn.disabled = true;
+
+            const prompt = `
+                Analyze the following financial profile. Provide a concise summary of their financial health, 
+                followed by 3 actionable, personalized recommendations in a bulleted list.
+
+                **Profile:**
+                - Monthly Income (after tax): $${profile.income}
+                - Current Savings: $${profile.savings}
+                - Monthly Expenses: Housing: $${profile.expenses.housing || 0}, Food: $${profile.expenses.food || 0}, Transport: $${profile.expenses.transport || 0}, Other: $${profile.expenses.other || 0}
+                - Financial Goals: "${profile.goals}"
+
+                Format the response in simple HTML (e.g., <p>, <strong>, <ul>, <li>).
+            `;
+
+            const result = await callGemini(prompt);
+            analysisResult.innerHTML = result;
+            analyzeBtn.disabled = false;
+
+            if (!result.toLowerCase().includes('error')) {
+                scenarioInput.disabled = false;
+                simulateBtn.disabled = false;
+                chatInput.disabled = false;
+                sendChatBtn.disabled = false;
+            }
+        });
+
+        // 2. Simulation
+        simulateBtn.addEventListener('click', async () => {
+            const scenario = scenarioInput.value;
+            if (!scenario || !userFinancialProfile) return;
+
+            simulationResult.innerHTML = '<div class="loader"></div>';
+            simulateBtn.disabled = true;
+
+            const prompt = `
+                Given the user's financial profile:
+                - Monthly Income: $${userFinancialProfile.income}
+                - Current Savings: $${userFinancialProfile.savings}
+                - Monthly Expenses Total: $${Object.values(userFinancialProfile.expenses).reduce((a, b) => Number(a) + Number(b), 0)}
+                - Goals: "${userFinancialProfile.goals}"
+
+                Simulate the financial impact of this scenario: "${scenario}".
+                
+                Provide a brief, clear analysis of the potential outcome in simple HTML.
+            `;
+            
+            const result = await callGemini(prompt);
+            simulationResult.innerHTML = result;
+            simulateBtn.disabled = false;
+        });
+
+        // 3. Chat
+        const handleSendChat = async () => {
+            const message = chatInput.value.trim();
+            if (!message || !userFinancialProfile) return;
+
+            addMessageToChatbox(message, 'user');
             chatInput.value = '';
-            chatInput.disabled = true;
             sendChatBtn.disabled = true;
 
-            addMessage(`<span class="blinking-cursor"></span>`, 'twin');
-            const typingIndicator = chatBox.lastElementChild;
+            chatHistory.push({ role: 'user', parts: [{ text: message }] });
 
-            const prompt = `You are a friendly AI financial twin. Use the user's financial profile as context: ${JSON.stringify(userFinancialProfile)}. Now, answer their question: "${userMessage}"`;
-            const twinResponse = await callGemini(prompt);
+            const prompt = `
+                You are a helpful AI financial advisor, a "Financial Twin".
+                User's profile:
+                - Income: $${userFinancialProfile.income}/month
+                - Savings: $${userFinancialProfile.savings}
+                - Goals: "${userFinancialProfile.goals}"
 
-            typingIndicator.remove();
-            addMessage(twinResponse.replace(/\n/g, '<br>'), 'twin');
+                Conversation history is provided below. Respond to the last user message. Be conversational and concise.
+                ${chatHistory.map(msg => `${msg.role}: ${msg.parts[0].text}`).join('\n')}
+            `;
 
-            chatInput.disabled = false;
+            const result = await callGemini(prompt);
+            
+            addMessageToChatbox(result, 'ai');
+            chatHistory.push({ role: 'model', parts: [{ text: result }] });
             sendChatBtn.disabled = false;
-            chatInput.focus();
+
+            if (chatHistory.length > 10) {
+                chatHistory = chatHistory.slice(-10);
+            }
+        };
+
+        sendChatBtn.addEventListener('click', handleSendChat);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSendChat();
+            }
+        });
+
+        function addMessageToChatbox(text, sender) {
+            const messageWrapper = document.createElement('div');
+            const messageBubble = document.createElement('div');
+            
+            messageWrapper.classList.add('flex', 'mb-4');
+            messageBubble.classList.add('p-3', 'rounded-lg', 'max-w-xs');
+
+            if (sender === 'user') {
+                messageWrapper.classList.add('justify-end');
+                messageBubble.classList.add('bg-blue-500', 'text-white');
+            } else {
+                messageWrapper.classList.add('justify-start');
+                messageBubble.classList.add('bg-gray-200', 'text-gray-800');
+            }
+            
+            messageBubble.innerHTML = text; // Use innerHTML to render HTML from API
+            messageWrapper.appendChild(messageBubble);
+            chatBox.appendChild(messageWrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- General Functions & Event Listeners ---
-        function enableAllInputs() {
-            Object.values(financialInputs).forEach(input => input.disabled = false);
-            analyzeBtn.disabled = false;
-            simulateBtn.disabled = false;
-            scenarioInput.disabled = false;
-            chatInput.disabled = false;
-            sendChatBtn.disabled = false;
-        }
-
-        analyzeBtn.addEventListener('click', handleAnalysis);
-        simulateBtn.addEventListener('click', handleSimulation);
-        scenarioInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleSimulation(); });
-        sendChatBtn.addEventListener('click', handleChatSend);
-        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleChatSend(); });
     </script>
 </body>
 </html>
