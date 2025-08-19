@@ -4,293 +4,315 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FINSCOPE - Your AI Financial Twin</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for theme and animations -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: #0a0a0a; /* Darker background */
+            color: #f5f5f5;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        .tab-active {
-            border-color: #3b82f6;
-            color: #3b82f6;
-            font-weight: 600;
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="antialiased">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-blue-600 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12B2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"></path><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 14c-2.67 0-8 1.33-8 4v2h16v-2c0-2.67-5.33-4-8-4z"></path></svg>
-                FINSCOPE
-            </a>
-            <button id="loginBtn" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors">Login / Sign Up</button>
-        </nav>
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold tracking-wider gradient-text">FINSCOPE</a>
+            <nav class="hidden md:flex items-center space-x-4" id="nav-default">
+                <button id="login-btn" class="text-gray-300 hover:text-white transition-colors">Login</button>
+                <button id="signup-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Sign Up
+                </button>
+            </nav>
+            <div class="hidden items-center space-x-4" id="nav-authenticated">
+                 <p id="user-greeting" class="text-gray-300"></p>
+                 <button id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Logout
+                </button>
+            </div>
+            <button class="md:hidden text-white" id="mobile-menu-button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden" id="mobile-menu">
+            <div class="px-6 pt-2 pb-4 space-y-2 text-center">
+                <button id="mobile-login-btn" class="block w-full text-gray-300 hover:text-white transition-colors py-2">Login</button>
+                <button id="mobile-signup-btn" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Sign Up
+                </button>
+            </div>
+        </div>
     </header>
 
-    <!-- Main Content -->
     <main>
         <!-- Hero Section -->
-        <section class="bg-white">
-            <div class="container mx-auto px-6 py-20 text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">Meet Your AI Financial Twin</h1>
-                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Simulate your financial future, get personalized advice, and achieve your goals with a digital version of you.</p>
+        <section class="pt-32 pb-20 text-center bg-grid-pattern">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+                    Meet Your <span class="gradient-text">AI Financial Twin</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+                    Simulate your financial future, get personalized advice, and achieve your goals with a digital version of you.
+                </p>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg shadow-blue-500/20">
+                    Get Started for Free
+                </button>
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section id="features" class="py-20">
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 bg-black/20">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900">How FINSCOPE Works</h2>
-                    <p class="mt-2 text-gray-600">A simple, step-by-step journey to financial clarity.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-3">How FINSCOPE Works</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">A simple, step-by-step journey to financial clarity.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">1. User Onboarding</h3>
-                        <p class="text-gray-600">Securely connect your financial accounts. We'll gather initial data on your income, expenses, and goals to get started.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Step 1 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">1</div>
+                        <h3 class="text-xl font-semibold mb-2">User Onboarding</h3>
+                        <p class="text-gray-400">
+                            Securely connect your financial accounts. We'll gather initial data on your income, expenses, and goals to get started.
+                        </p>
                     </div>
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M16.24 7.76A6 6 0 0 0 7.76 16.24"/><path d="M12 18a6 6 0 0 0 0-12"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">2. Create the Financial Twin</h3>
-                        <p class="text-gray-600">Our AI creates your "Financial Twin" based on your unique behavior. It learns how you spend, save, and make financial decisions.</p>
+                    <!-- Step 2 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">2</div>
+                        <h3 class="text-xl font-semibold mb-2">Create the Financial Twin</h3>
+                        <p class="text-gray-400">
+                            Our AI creates your "Financial Twin" based on your unique behavior. It learns how you spend, save, and make financial decisions.
+                        </p>
                     </div>
-                    <div class="bg-white p-8 rounded-xl shadow-md feature-card transition-all">
-                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 text-purple-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.5 12.5"/><path d="M2 12.5a10 10 0 0 0 18.5-1"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">3. Personalized Advice</h3>
-                        <p class="text-gray-600">Receive real-time, tailored suggestions—like saving tips, spending alerts, or smarter investment ideas—based on your behavior.</p>
+                    <!-- Step 3 -->
+                    <div class="feature-card p-8 rounded-xl text-center">
+                        <div class="text-4xl font-bold gradient-text mb-4">3</div>
+                        <h3 class="text-xl font-semibold mb-2">Personalized Advice</h3>
+                        <p class="text-gray-400">
+                            Receive real-time, tailored suggestions—like saving tips, spending alerts, or smarter investment ideas—based on your behavior.
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Security Section -->
-        <section id="security" class="py-20 bg-blue-50">
+        <section class="py-20">
             <div class="container mx-auto px-6 text-center">
-                 <div class="flex items-center justify-center h-20 w-20 rounded-full bg-blue-200 text-blue-700 mb-4 mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Secure & Private By Design</h2>
-                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">Your trust is our top priority. All your data is encrypted and protected with bank-level security. You always stay in control of your information.</p>
+                 <div class="flex justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5.002L2 15.854a2 2 0 002 2h12a2 2 0 002-2V5.002A11.954 11.954 0 0110 1.944zM10 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 4zm0 6.5a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                    </svg>
+                 </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Secure & Private By Design</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Your trust is our top priority. All your data is encrypted and protected with bank-level security. You always stay in control of your information.
+                </p>
             </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p>&copy; 2024 FINSCOPE. All rights reserved.</p>
-            <p class="text-sm text-gray-400 mt-2">Your Financial Future, Simulated.</p>
+    <footer class="border-t border-gray-800">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p class="font-bold text-lg mb-2 gradient-text">FINSCOPE</p>
+            <p class="mb-4">Your Financial Future, Simulated.</p>
+            <p class="text-sm">&copy; 2024 FINSCOPE. All rights reserved.</p>
         </div>
     </footer>
     
-    <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md m-4 transform transition-all" id="modalContent">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-900">Welcome to FINSCOPE</h2>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-800 text-3xl leading-none">&times;</button>
+    <!-- Login/Signup Modal -->
+    <div id="auth-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-md p-8 rounded-2xl shadow-2xl m-4 relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
+            <h2 id="modal-title" class="text-2xl font-bold text-center mb-4">Login to FINSCOPE</h2>
+            <div class="space-y-4">
+                 <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.686 44 24c0-1.341-.138-2.65-.389-3.917z"/></g></svg>
+                    Continue with Google
+                </button>
+                <div class="flex items-center text-center">
+                    <hr class="flex-grow border-gray-600">
+                    <span class="px-4 text-gray-500">OR</span>
+                    <hr class="flex-grow border-gray-600">
+                </div>
+                <form id="email-form" class="space-y-4">
+                    <input type="email" placeholder="Email Address" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <button type="submit" id="email-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                        Continue
+                    </button>
+                </form>
             </div>
-            
-            <div class="border-b border-gray-200 mt-4">
-                <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                    <button id="signupTab" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm tab-active">Sign Up</button>
-                    <button id="loginTab" class="whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">Log In</button>
-                </nav>
-            </div>
-
-            <!-- Sign Up Form -->
-            <div id="signupForm" class="mt-6">
-                <div class="mb-4">
-                    <label for="signupName" class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" id="signupName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="John Doe">
-                </div>
-                <div class="mb-4">
-                    <label for="signupEmail" class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="signupEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com">
-                </div>
-                <div class="mb-6">
-                    <label for="signupPassword" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="signupPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
-                </div>
-                <button id="signupBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Create Account</button>
-            </div>
-
-            <!-- Log In Form -->
-            <div id="loginForm" class="mt-6 hidden">
-                <div class="mb-4">
-                    <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="loginEmail" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="you@example.com">
-                </div>
-                <div class="mb-6">
-                    <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="loginPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
-                </div>
-                <button id="loginEmailBtn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Log In</button>
-            </div>
-
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white text-gray-500">OR</span>
-                </div>
-            </div>
-
-            <button id="googleSignInBtn" class="w-full flex justify-center items-center gap-2 bg-white text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-300">
-                <svg class="w-5 h-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 23.4 172.9 61.9l-76.2 74.7C309 93.5 280.7 80 248 80c-82.6 0-150 67.4-150 150s67.4 150 150 150c94.5 0 135.7-77.6 140.8-112.2H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
-                Sign in with Google
-            </button>
-            <p id="authError" class="text-red-500 text-sm mt-4 text-center"></p>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            signOut,
             onAuthStateChanged,
-            GoogleAuthProvider,
-            signInWithPopup,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword
+            signInAnonymously,
+            signInWithCustomToken
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            setDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Initialization ---
-        const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
-        const firebaseConfig = JSON.parse(firebaseConfigString);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
+            authDomain: "finscope-282b3.firebaseapp.com",
+            projectId: "finscope-282b3",
+            storageBucket: "finscope-282b3.firebasestorage.app",
+            messagingSenderId: "838937656151",
+            appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
+            measurementId: "G-R8GE51ZT8J"
+        };
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-        // --- Authentication Logic ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                window.location.href = 'main.html';
-            }
-        });
-
-        // --- UI Elements ---
-        const authModal = document.getElementById('authModal');
-        const openModalBtns = [document.getElementById('loginBtn')];
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const signupTab = document.getElementById('signupTab');
-        const loginTab = document.getElementById('loginTab');
-        const signupForm = document.getElementById('signupForm');
-        const loginForm = document.getElementById('loginForm');
-        const authError = document.getElementById('authError');
-
-        // --- Modal and Tab Logic ---
-        const openModal = () => authModal.classList.remove('hidden');
-        const closeModal = () => authModal.classList.add('hidden');
-
-        openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
-        closeModalBtn.addEventListener('click', closeModal);
-        authModal.addEventListener('click', e => {
-            if (e.target === authModal) closeModal();
-        });
-
-        signupTab.addEventListener('click', () => {
-            signupTab.classList.add('tab-active');
-            loginTab.classList.remove('tab-active');
-            signupForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-            authError.textContent = '';
-        });
-
-        loginTab.addEventListener('click', () => {
-            loginTab.classList.add('tab-active');
-            signupTab.classList.remove('tab-active');
-            loginForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
-            authError.textContent = '';
-        });
-
-        // --- Firebase Auth Functions ---
-        const saveUserData = async (user, additionalData = {}) => {
-            if (!user) return;
-            const userRef = doc(db, `/artifacts/${appId}/users/${user.uid}/profile/data`);
-            try {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || additionalData.name,
-                    createdAt: serverTimestamp(),
-                    ...additionalData
-                }, { merge: true });
-            } catch (error) {
-                console.error("Error saving user data:", error);
-            }
-        };
+        // DOM Elements
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const mobileSignupBtn = document.getElementById('mobile-signup-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
         
-        document.getElementById('signupBtn').addEventListener('click', async () => {
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            authError.textContent = '';
-            if (!name || !email || !password) {
-                authError.textContent = 'Please fill out all fields.';
-                return;
+        const authModal = document.getElementById('auth-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const emailForm = document.getElementById('email-form');
+        const emailSubmitBtn = document.getElementById('email-submit-btn');
+
+        const navDefault = document.getElementById('nav-default');
+        const navAuthenticated = document.getElementById('nav-authenticated');
+        const userGreeting = document.getElementById('user-greeting');
+        
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // --- Modal Logic ---
+        const openModal = (isSignUp = false) => {
+            modalTitle.textContent = isSignUp ? 'Create an Account' : 'Login to FINSCOPE';
+            emailSubmitBtn.textContent = isSignUp ? 'Sign Up' : 'Login';
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+        };
+
+        const closeModal = () => {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+        };
+
+        // --- Event Listeners ---
+        loginBtn.addEventListener('click', () => openModal(false));
+        signupBtn.addEventListener('click', () => openModal(true));
+        mobileLoginBtn.addEventListener('click', () => {
+            openModal(false);
+            mobileMenu.classList.add('hidden');
+        });
+        mobileSignupBtn.addEventListener('click', () => {
+            openModal(true);
+            mobileMenu.classList.add('hidden');
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                closeModal();
             }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await saveUserData(userCredential.user, { name });
-            } catch (error) {
-                authError.textContent = error.message;
+        });
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Firebase Authentication ---
+        googleSignInBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log("Signed in with Google:", user);
+                    closeModal();
+                }).catch((error) => {
+                    console.error("Google Sign-In Error:", error);
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                console.log("User signed out.");
+            }).catch((error) => {
+                console.error("Sign Out Error:", error);
+            });
+        });
+
+        // Dummy handler for email form
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real app, you would handle email/password sign-in/sign-up here.
+            // For this demo, we'll just log it and close the modal.
+            console.log("Email form submitted. Implement Firebase email auth here.");
+            closeModal();
+        });
+
+        // --- Auth State Observer ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                console.log("User is signed in:", user);
+                navDefault.classList.add('md:hidden');
+                navDefault.classList.remove('md:flex');
+                navAuthenticated.classList.remove('hidden');
+                navAuthenticated.classList.add('flex');
+                userGreeting.textContent = `Welcome, ${user.displayName || user.email.split('@')[0]}`;
+            } else {
+                // User is signed out
+                console.log("User is signed out.");
+                navDefault.classList.remove('md:hidden');
+                navDefault.classList.add('md:flex');
+                navAuthenticated.classList.add('hidden');
+                navAuthenticated.classList.remove('flex');
+                userGreeting.textContent = '';
             }
         });
 
-        document.getElementById('loginEmailBtn').addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            authError.textContent = '';
-            if (!email || !password) {
-                authError.textContent = 'Please enter email and password.';
-                return;
-            }
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
-
-        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            authError.textContent = '';
-            try {
-                const result = await signInWithPopup(auth, provider);
-                await saveUserData(result.user);
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
     </script>
 </body>
 </html>
