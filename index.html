@@ -264,8 +264,8 @@
         googleSignInBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    const user = result.user;
-                    console.log("Signed in with Google:", user);
+                    // The onAuthStateChanged observer will handle the redirect.
+                    console.log("Signed in with Google:", result.user);
                     closeModal();
                 }).catch((error) => {
                     console.error("Google Sign-In Error:", error);
@@ -284,23 +284,20 @@
         emailForm.addEventListener('submit', (e) => {
             e.preventDefault();
             // In a real app, you would handle email/password sign-in/sign-up here.
-            // For this demo, we'll just log it and close the modal.
+            // For this demo, we'll just log it and assume success.
             console.log("Email form submitted. Implement Firebase email auth here.");
-            closeModal();
+            // A real implementation would trigger onAuthStateChanged on success.
+            // For now, we manually redirect, but the observer is the better pattern.
+            window.location.href = 'main.html';
         });
 
         // --- Auth State Observer ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is signed in
-                console.log("User is signed in:", user);
-                navDefault.classList.add('md:hidden');
-                navDefault.classList.remove('md:flex');
-                navAuthenticated.classList.remove('hidden');
-                navAuthenticated.classList.add('flex');
-                userGreeting.textContent = `Welcome, ${user.displayName || user.email.split('@')[0]}`;
+                // User is signed in, redirect to the main application page.
+                window.location.href = 'main.html';
             } else {
-                // User is signed out
+                // User is signed out, ensure the UI is in the logged-out state.
                 console.log("User is signed out.");
                 navDefault.classList.remove('md:hidden');
                 navDefault.classList.add('md:flex');
