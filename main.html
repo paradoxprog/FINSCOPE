@@ -13,6 +13,17 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
+        .blinking-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1rem;
+            background-color: #333;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { background-color: transparent }
+            50% { background-color: #333; }
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -26,7 +37,6 @@
             </a>
             <div class="flex items-center gap-4">
                 <span id="user-display" class="text-gray-600 font-medium"></span>
-                <button id="logoutBtn" class="bg-red-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-red-600 transition-colors">Logout</button>
             </div>
         </nav>
     </header>
@@ -43,7 +53,7 @@
                     <label for="scenarioInput" class="block text-lg font-medium text-gray-700">Your "What If" Question:</label>
                     <div class="mt-2 flex flex-col sm:flex-row gap-4">
                         <input type="text" id="scenarioInput" class="flex-grow w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., What if I buy a car for $25,000?">
-                        <button id="simulateBtn" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">Simulate</button>
+                        <button id="simulateBtn" class="bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50" disabled>Simulate</button>
                     </div>
                     <div id="simulationResult" class="mt-6 p-6 bg-white rounded-lg min-h-[100px] border border-gray-200">
                         <p class="text-gray-500">Your simulation result will appear here...</p>
@@ -72,8 +82,8 @@
                         </div>
                     </div>
                     <div class="p-4 border-t flex">
-                        <input type="text" id="chatInput" placeholder="Ask your Twin a question..." class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <button id="sendChatBtn" class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">Send</button>
+                        <input type="text" id="chatInput" placeholder="Ask your Twin a question..." class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" disabled>
+                        <button id="sendChatBtn" class="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors disabled:opacity-50" disabled>Send</button>
                     </div>
                 </div>
             </div>
@@ -103,89 +113,148 @@
 
         // --- Auth State Management ---
         const userDisplay = document.getElementById('user-display');
+        const simulateBtn = document.getElementById('simulateBtn');
+        const scenarioInput = document.getElementById('scenarioInput');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+
         onAuthStateChanged(auth, user => {
             if (user) {
                 // User is signed in.
-                userDisplay.textContent = user.displayName || user.email;
+                userDisplay.textContent = `Welcome, ${user.displayName || user.email}!`;
+                // Enable UI elements now that user is logged in
+                simulateBtn.disabled = false;
+                scenarioInput.disabled = false;
+                chatInput.disabled = false;
+                sendChatBtn.disabled = false;
             } else {
                 // No user is signed in, redirect to the landing page.
                 window.location.href = './index.html';
             }
         });
 
-        // --- Logout ---
-        const logoutBtn = document.getElementById('logoutBtn');
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                // The onAuthStateChanged listener will handle the redirect.
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
-        });
+        // --- Gemini API Integration ---
+        const apiKey = "AIzaSyCQpluFQok4C0jkqbQIMRKat434aF4zvXY";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-        // --- Simulation & Chat Logic (Copied from original file) ---
+        /**
+         * Calls the Gemini API with a given prompt and handles retries with exponential backoff.
+         * @param {string} prompt The text prompt to send to the API.
+         * @returns {Promise<string>} The generated text response from the API.
+         */
+        async function callGemini(prompt) {
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            let responseText = "Sorry, I couldn't process that request. Please try again.";
+            let retries = 3;
+            let delay = 1000;
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        responseText = result.candidates[0].content.parts[0].text;
+                        return responseText; // Success, exit the loop
+                    } else {
+                         throw new Error("Invalid response structure from API.");
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i < retries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; // Exponential backoff
+                    }
+                }
+            }
+            return responseText; // Return default error message after all retries fail
+        }
+
+
         // --- Simulation Logic ---
-        const simulateBtn = document.getElementById('simulateBtn');
-        const scenarioInput = document.getElementById('scenarioInput');
         const simulationResult = document.getElementById('simulationResult');
 
-        simulateBtn.addEventListener('click', () => {
-            const query = scenarioInput.value.toLowerCase().trim();
-            let resultHTML = '';
+        simulateBtn.addEventListener('click', async () => {
+            const query = scenarioInput.value.trim();
+            if (query === '') {
+                simulationResult.innerHTML = '<p class="text-red-500">Please enter a scenario to simulate.</p>';
+                return;
+            }
+
             simulationResult.innerHTML = '<p class="text-gray-500 animate-pulse">Your Twin is analyzing the scenario...</p>';
-            setTimeout(() => {
-                if (query.includes('car')) {
-                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario: Buying a Car</h4><p class="mt-2 text-gray-600">Based on your current financial habits, purchasing a car for <strong>$25,000</strong> would:</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>Increase your monthly expenses by approx. <strong>$480</strong>.</li><li>Decrease your monthly savings rate from <strong>15% to 9%</strong>.</li><li>Delay your goal of a house down payment by <strong>18 months</strong>.</li></ul>`;
-                } else if (query.includes('raise') || query.includes('promotion')) {
-                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario: 10% Salary Increase</h4><p class="mt-2 text-gray-600">A 10% salary raise would significantly boost your finances:</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>Your net monthly income would increase by approx. <strong>$450</strong>.</li><li>If you save 50% of this raise, you could reach your emergency fund goal <strong>8 months sooner</strong>.</li></ul>`;
-                } else if (query === '') {
-                    resultHTML = '<p class="text-red-500">Please enter a scenario to simulate.</p>';
-                } else {
-                    resultHTML = `<h4 class="font-bold text-lg text-gray-800">Scenario Analysis</h4><p class="mt-2 text-gray-600">This decision could positively impact your long-term wealth but might strain your short-term cash flow.</p>`;
-                }
-                simulationResult.innerHTML = resultHTML;
-            }, 1500);
+            
+            const prompt = `As a financial expert AI, analyze the following scenario for a user and provide a concise, easy-to-understand summary of the potential impacts on their finances. Use bullet points for key takeaways. Scenario: "${query}"`;
+
+            const resultText = await callGemini(prompt);
+            simulationResult.innerHTML = `<div class="text-gray-700">${resultText.replace(/\n/g, '<br>')}</div>`;
         });
         scenarioInput.addEventListener('keydown', e => { if (e.key === 'Enter') simulateBtn.click(); });
 
         // --- Chat Logic ---
         const chatBox = document.getElementById('chatBox');
-        const chatInput = document.getElementById('chatInput');
-        const sendChatBtn = document.getElementById('sendChatBtn');
 
         const addMessage = (message, sender) => {
             const messageDiv = document.createElement('div');
             const bubbleDiv = document.createElement('div');
             messageDiv.classList.add('flex', 'mb-4');
             bubbleDiv.classList.add('p-3', 'rounded-lg', 'max-w-xs');
-            bubbleDiv.textContent = message;
+            
             if (sender === 'user') {
                 messageDiv.classList.add('justify-end');
                 bubbleDiv.classList.add('bg-blue-600', 'text-white');
+                bubbleDiv.textContent = message;
             } else {
                 messageDiv.classList.add('justify-start');
                 bubbleDiv.classList.add('bg-gray-200', 'text-gray-800');
+                // For AI, we might have HTML content
+                bubbleDiv.innerHTML = message;
             }
+            
             messageDiv.appendChild(bubbleDiv);
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         };
         
-        const getTwinResponse = (userMessage) => {
-            const msg = userMessage.toLowerCase();
-            if (msg.includes('save more')) return "Based on your spending, you could save an extra $150/month by reducing dining out by 25%.";
-            if (msg.includes('invest')) return "Your risk profile suggests a diversified ETF portfolio could be a good start.";
-            if (msg.includes('retire')) return "You are on track to retire at age 62. Increasing your monthly contribution by $300 could move that up to age 60.";
-            return "That's an interesting question. Let me analyze your data... Your spending on subscriptions has increased by 15% this quarter.";
-        };
-
-        const handleChatSend = () => {
+        const handleChatSend = async () => {
             const userMessage = chatInput.value.trim();
             if (userMessage === '') return;
+
             addMessage(userMessage, 'user');
             chatInput.value = '';
-            setTimeout(() => addMessage(getTwinResponse(userMessage), 'twin'), 1200);
+            chatInput.disabled = true;
+            sendChatBtn.disabled = true;
+
+            // Add a typing indicator
+            const typingIndicatorId = `typing-${Date.now()}`;
+            addMessage(`<span class="font-medium">Financial Twin is typing</span><span class="blinking-cursor ml-1"></span>`, 'twin');
+            const typingIndicator = chatBox.lastElementChild;
+
+            const prompt = `You are a friendly and helpful AI financial twin. Answer the following user question concisely and in a conversational tone. User question: "${userMessage}"`;
+            const twinResponse = await callGemini(prompt);
+            
+            // Remove typing indicator and add final response
+            typingIndicator.remove();
+            addMessage(twinResponse.replace(/\n/g, '<br>'), 'twin');
+
+            chatInput.disabled = false;
+            sendChatBtn.disabled = false;
+            chatInput.focus();
         };
 
         sendChatBtn.addEventListener('click', handleChatSend);
