@@ -168,7 +168,7 @@
         // IMPORTANT: YOU MUST REPLACE THE PLACEHOLDER KEY BELOW WITH YOUR OWN API KEY
         // Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
         // =================================================================================
-        const GEMINI_API_KEY = "AIzaSyBhwzlZShzqrPbxMY0y4qftB-0EpDhV-zk"; 
+        const GEMINI_API_KEY = "AIzaSyAdbjm2hDR-hciT5-V-by7WyvPJe-6-Y-M"; 
         
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -244,7 +244,20 @@
 
                 const data = await response.json();
                 if (data.candidates && data.candidates.length > 0) {
-                    return data.candidates[0].content.parts[0].text;
+                    let rawText = data.candidates[0].content.parts[0].text;
+                    
+                    // Clean the response: The model sometimes prefixes the response with "html" or markdown fences.
+                    let cleanedText = rawText.trim();
+                    if (cleanedText.startsWith('```html')) {
+                        cleanedText = cleanedText.substring(7);
+                        if (cleanedText.endsWith('```')) {
+                            cleanedText = cleanedText.slice(0, -3);
+                        }
+                    } else if (cleanedText.toLowerCase().startsWith('html')) {
+                        cleanedText = cleanedText.substring(4);
+                    }
+                    
+                    return cleanedText.trim();
                 } else {
                     return "I'm not sure how to respond to that. Could you try rephrasing?";
                 }
