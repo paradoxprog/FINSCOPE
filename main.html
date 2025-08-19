@@ -140,7 +140,6 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -163,23 +162,21 @@
         
         // --- Main Application Logic ---
         try {
-            // Your web app's Firebase configuration
-            const firebaseConfig = {
-              apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
-              authDomain: "finscope-282b3.firebaseapp.com",
-              projectId: "finscope-282b3",
-              storageBucket: "finscope-282b3.appspot.com",
-              messagingSenderId: "838937656151",
-              appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
-              measurementId: "G-R8GE51ZT8J"
-            };
-
-            // Initialize Firebase
+            const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+            const firebaseConfig = JSON.parse(firebaseConfigString);
+            
+            if (!firebaseConfig.apiKey) {
+                throw new Error("Firebase configuration is missing or invalid. Cannot connect to services.");
+            }
+            
+            appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.appId;
+            if (!appId) {
+                throw new Error("Application ID is missing.");
+            }
+            
             const app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
             const auth = getAuth(app);
             db = getFirestore(app);
-            appId = firebaseConfig.appId;
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
