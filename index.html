@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FINSCOPE - Your AI Financial Twin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -165,7 +165,6 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { 
             getAuth, 
             onAuthStateChanged,
@@ -181,23 +180,14 @@
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyD6iB5gh_4arp0UkqILCFRgXq4KRFmDpAY",
-          authDomain: "finscope-282b3.firebaseapp.com",
-          projectId: "finscope-282b3",
-          storageBucket: "finscope-282b3.appspot.com",
-          messagingSenderId: "838937656151",
-          appId: "1:838937656151:web:85cfddd9dd86b39d4cdc12",
-          measurementId: "G-R8GE51ZT8J"
-        };
-
-        // Initialize Firebase
+        // --- Firebase Initialization ---
+        const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        const firebaseConfig = JSON.parse(firebaseConfigString);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = firebaseConfig.appId;
 
         // --- Authentication Logic ---
         onAuthStateChanged(auth, user => {
