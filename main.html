@@ -164,8 +164,12 @@
             measurementId: "G-R8GE51ZT8J"
         };
         
-        // The API key is an empty string; the environment will provide it.
-        const GEMINI_API_KEY = ""; 
+        // =================================================================================
+        // IMPORTANT: YOU MUST REPLACE THE PLACEHOLDER KEY BELOW WITH YOUR OWN API KEY
+        // Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
+        // =================================================================================
+        const GEMINI_API_KEY = "AIzaSyBhwzlZShzqrPbxMY0y4qftB-0EpDhV-zk"; 
+        
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
         // --- INITIALIZATION ---
@@ -219,6 +223,9 @@
 
         // --- GEMINI API HELPER with Exponential Backoff ---
         async function callGemini(prompt, retries = 3, delay = 1000) {
+            if (GEMINI_API_KEY === "AIzaSyAdbjm2hDR-hciT5-V-by7WyvPJe-6-Y-M") {
+                 return `<p class="text-red-500"><strong>Configuration Error:</strong> Please replace the placeholder API key in the script with your actual Gemini API key from Google AI Studio.</p>`;
+            }
             try {
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
