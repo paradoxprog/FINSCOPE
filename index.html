@@ -153,11 +153,11 @@
     <!-- Login/Signup Modal -->
     <div id="auth-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-backdrop">
         <div class="bg-gray-900 border border-gray-700 w-full max-w-md p-8 rounded-2xl shadow-2xl m-4 relative">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white text-3xl leading-none">&times;</button>
             <h2 id="modal-title" class="text-2xl font-bold text-center mb-4">Login to FINSCOPE</h2>
             <div class="space-y-4">
                  <button id="google-signin-btn" class="w-full flex items-center justify-center bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
-                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.686 44 24c0-1.341-.138-2.65-.389-3.917z"/></g></svg>
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.686 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
                     Continue with Google
                 </button>
                 <div class="flex items-center text-center">
@@ -166,8 +166,9 @@
                     <hr class="flex-grow border-gray-600">
                 </div>
                 <form id="email-form" class="space-y-4">
-                    <input type="email" placeholder="Email Address" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <input type="password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="email" id="email-input" placeholder="Email Address" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <input type="password" id="password-input" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <p id="auth-error" class="text-red-500 text-sm hidden"></p>
                     <button type="submit" id="email-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
                         Continue
                     </button>
@@ -186,8 +187,8 @@
             signInWithPopup, 
             signOut,
             onAuthStateChanged,
-            signInAnonymously,
-            signInWithCustomToken
+            createUserWithEmailAndPassword, // <-- Import function for creating users
+            signInWithEmailAndPassword    // <-- Import function for signing in users
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // Your web app's Firebase configuration
@@ -218,7 +219,10 @@
         const authModal = document.getElementById('auth-modal');
         const modalTitle = document.getElementById('modal-title');
         const emailForm = document.getElementById('email-form');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
         const emailSubmitBtn = document.getElementById('email-submit-btn');
+        const authError = document.getElementById('auth-error');
 
         const navDefault = document.getElementById('nav-default');
         const navAuthenticated = document.getElementById('nav-authenticated');
@@ -227,10 +231,15 @@
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
+        let isSignUpMode = false; // <-- State to track if modal is for sign-up or login
+
         // --- Modal Logic ---
         const openModal = (isSignUp = false) => {
+            isSignUpMode = isSignUp; // <-- Set the mode when opening
             modalTitle.textContent = isSignUp ? 'Create an Account' : 'Login to FINSCOPE';
             emailSubmitBtn.textContent = isSignUp ? 'Sign Up' : 'Login';
+            authError.classList.add('hidden'); // Hide any previous errors
+            emailForm.reset(); // Clear form fields
             authModal.classList.remove('hidden');
             authModal.classList.add('flex');
         };
@@ -267,42 +276,70 @@
         googleSignInBtn.addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    // The onAuthStateChanged observer will handle the redirect.
+                    // The onAuthStateChanged observer will handle the UI changes/redirect.
                     console.log("Signed in with Google:", result.user);
                     closeModal();
                 }).catch((error) => {
                     console.error("Google Sign-In Error:", error);
+                    authError.textContent = error.message;
+                    authError.classList.remove('hidden');
                 });
         });
 
         logoutBtn.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                console.log("User signed out.");
-            }).catch((error) => {
+            signOut(auth).catch((error) => {
                 console.error("Sign Out Error:", error);
             });
         });
 
-        // Dummy handler for email form
+        // --- UPDATED: Email/Password Form Handler ---
         emailForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            // In a real app, you would handle email/password sign-in/sign-up here.
-            // For this demo, we'll just log it and assume success.
-            console.log("Email form submitted. Implement Firebase email auth here.");
-            // A real implementation would trigger onAuthStateChanged on success.
-            // For now, we manually redirect, but the observer is the better pattern.
-            window.location.href = 'main.html';
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            authError.classList.add('hidden'); // Hide error initially
+
+            if (isSignUpMode) {
+                // --- Handle User Creation (Sign Up) ---
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        // Signed in successfully, onAuthStateChanged will handle the redirect
+                        console.log('User created:', userCredential.user);
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        console.error("Sign Up Error:", error);
+                        authError.textContent = error.message;
+                        authError.classList.remove('hidden');
+                    });
+            } else {
+                // --- Handle User Sign In (Login) ---
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                        // Signed in successfully, onAuthStateChanged will handle the redirect
+                        console.log('User signed in:', userCredential.user);
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        console.error("Login Error:", error);
+                        authError.textContent = error.message;
+                        authError.classList.remove('hidden');
+                    });
+            }
         });
 
         // --- Auth State Observer ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, redirect to the main application page.
-                window.location.href = 'main.html';
+                // This single observer handles login, signup, and session persistence.
+                if (window.location.pathname !== '/main.html') {
+                    window.location.href = 'main.html';
+                }
             } else {
                 // User is signed out, ensure the UI is in the logged-out state.
                 console.log("User is signed out.");
-                navDefault.classList.remove('md:hidden');
+                navDefault.classList.remove('hidden');
                 navDefault.classList.add('md:flex');
                 navAuthenticated.classList.add('hidden');
                 navAuthenticated.classList.remove('flex');
