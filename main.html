@@ -51,7 +51,7 @@
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="./index.html" class="flex items-center text-2xl font-bold tracking-wider">
-                <img src="logo.jpg" alt="FINSCOPE Logo" class="h-12 w-12 mr-3">
+                <img src="https://placehold.co/48x48/blue/white?text=FS" alt="FINSCOPE Logo" class="h-12 w-12 mr-3 rounded-full">
                 <span class="gradient-text">FINSCOPE</span>
             </a>
             <div id="user-nav" class="hidden items-center space-x-4">
@@ -74,15 +74,15 @@
                 <div class="max-w-3xl mx-auto bg-gray-50 p-8 rounded-xl shadow-inner">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="monthlyIncome" class="block text-sm font-medium text-gray-700">Monthly Income (after tax)</label>
-                            <input type="number" id="monthlyIncome" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="3000">
+                            <label for="monthlyIncome" class="block text-sm font-medium text-gray-700">Monthly Income (after tax, in ₹)</label>
+                            <input type="number" id="monthlyIncome" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="50000">
                         </div>
                         <div>
-                            <label for="currentSavings" class="block text-sm font-medium text-gray-700">Current Savings</label>
-                            <input type="number" id="currentSavings" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="10000">
+                            <label for="currentSavings" class="block text-sm font-medium text-gray-700">Current Savings (in ₹)</label>
+                            <input type="number" id="currentSavings" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="200000">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Monthly Expenses</label>
+                            <label class="block text-sm font-medium text-gray-700">Monthly Expenses (in ₹)</label>
                             <div class="grid grid-cols-2 gap-4 mt-1">
                                 <input type="number" id="housing" class="w-full p-2 border rounded-md" placeholder="Housing">
                                 <input type="number" id="food" class="w-full p-2 border rounded-md" placeholder="Food">
@@ -171,7 +171,7 @@
         // IMPORTANT: YOU MUST REPLACE THE PLACEHOLDER KEY BELOW WITH YOUR OWN API KEY
         // Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
         // =================================================================================
-        const GEMINI_API_KEY = "AIzaSyBhwzlZShzqrPbxMY0y4qftB-0EpDhV-zk"; 
+        const GEMINI_API_KEY = "YOUR_API_KEY_HERE"; // <-- IMPORTANT: PASTE YOUR KEY HERE
         
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -226,7 +226,7 @@
 
         // --- GEMINI API HELPER with Exponential Backoff ---
         async function callGemini(prompt, retries = 3, delay = 1000) {
-            if (GEMINI_API_KEY === "AIzaSyAdbjm2hDR-hciT5-V-by7WyvPJe-6-Y-M") {
+            if (GEMINI_API_KEY === "YOUR_API_KEY_HERE") {
                  return `<p class="text-red-500"><strong>Configuration Error:</strong> Please replace the placeholder API key in the script with your actual Gemini API key from Google AI Studio.</p>`;
             }
             try {
@@ -300,13 +300,13 @@
             analyzeBtn.disabled = true;
 
             const prompt = `
-                Analyze the following financial profile. Provide a concise summary of their financial health, 
+                Analyze the following financial profile (all amounts are in Indian Rupees, INR). Provide a concise summary of their financial health, 
                 followed by 3 actionable, personalized recommendations in a bulleted list.
 
                 **Profile:**
-                - Monthly Income (after tax): $${profile.income}
-                - Current Savings: $${profile.savings}
-                - Monthly Expenses: Housing: $${profile.expenses.housing || 0}, Food: $${profile.expenses.food || 0}, Transport: $${profile.expenses.transport || 0}, Other: $${profile.expenses.other || 0}
+                - Monthly Income (after tax): ₹${profile.income}
+                - Current Savings: ₹${profile.savings}
+                - Monthly Expenses: Housing: ₹${profile.expenses.housing || 0}, Food: ₹${profile.expenses.food || 0}, Transport: ₹${profile.expenses.transport || 0}, Other: ₹${profile.expenses.other || 0}
                 - Financial Goals: "${profile.goals}"
 
                 Format the response in simple HTML (e.g., <p>, <strong>, <ul>, <li>).
@@ -333,10 +333,10 @@
             simulateBtn.disabled = true;
 
             const prompt = `
-                Given the user's financial profile:
-                - Monthly Income: $${userFinancialProfile.income}
-                - Current Savings: $${userFinancialProfile.savings}
-                - Monthly Expenses Total: $${Object.values(userFinancialProfile.expenses).reduce((a, b) => Number(a) + Number(b), 0)}
+                Given the user's financial profile (in Indian Rupees, INR):
+                - Monthly Income: ₹${userFinancialProfile.income}
+                - Current Savings: ₹${userFinancialProfile.savings}
+                - Monthly Expenses Total: ₹${Object.values(userFinancialProfile.expenses).reduce((a, b) => Number(a) + Number(b), 0)}
                 - Goals: "${userFinancialProfile.goals}"
 
                 Simulate the financial impact of this scenario: "${scenario}".
@@ -362,9 +362,9 @@
 
             const prompt = `
                 You are a helpful AI financial advisor, a "Financial Twin".
-                User's profile:
-                - Income: $${userFinancialProfile.income}/month
-                - Savings: $${userFinancialProfile.savings}
+                User's profile (amounts are in Indian Rupees, INR):
+                - Income: ₹${userFinancialProfile.income}/month
+                - Savings: ₹${userFinancialProfile.savings}
                 - Goals: "${userFinancialProfile.goals}"
 
                 Conversation history is provided below. Respond to the last user message. Be conversational and concise.
