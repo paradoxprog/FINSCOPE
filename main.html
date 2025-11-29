@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FINSCOPE - Your Dashboard</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Custom CSS for theme and animations -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -47,7 +44,6 @@
 </head>
 <body class="antialiased text-gray-800">
 
-    <!-- Header -->
     <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="./index.html" class="flex items-center text-2xl font-bold tracking-wider">
@@ -64,7 +60,6 @@
     </header>
 
     <main>
-        <!-- 1. Financial Input Section -->
         <section id="financial-input" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -103,7 +98,6 @@
             </div>
         </section>
 
-        <!-- 2. "What If?" Simulation Section -->
         <section id="simulation" class="py-20">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -123,7 +117,6 @@
             </div>
         </section>
 
-        <!-- 3. Chat Section -->
         <section id="chat" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
@@ -151,7 +144,6 @@
         </section>
     </main>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -167,14 +159,6 @@
             measurementId: "G-R8GE51ZT8J"
         };
         
-        // =================================================================================
-        // IMPORTANT: YOU MUST REPLACE THE PLACEHOLDER KEY BELOW WITH YOUR OWN API KEY
-        // Get your key from Google AI Studio: https://aistudio.google.com/app/apikey
-        // =================================================================================
-        const GEMINI_API_KEY = "AIzaSyBhwzlZShzqrPbxMY0y4qftB-0EpDhV-zk"; // <-- IMPORTANT: PASTE YOUR KEY HERE
-        
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
-
         // --- INITIALIZATION ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -224,15 +208,16 @@
             signOut(auth).catch((error) => console.error('Sign Out Error', error));
         });
 
-        // --- GEMINI API HELPER with Exponential Backoff ---
+        // --- SECURE API HELPER ---
+        // SECURITY UPDATE: Calls /api/gemini instead of Google directly
         async function callGemini(prompt, retries = 3, delay = 1000) {
-            if (GEMINI_API_KEY === "YOUR_API_KEY_HERE") {
-                 return `<p class="text-red-500"><strong>Configuration Error:</strong> Please replace the placeholder API key in the script with your actual Gemini API key from Google AI Studio.</p>`;
-            }
+            const API_URL = '/api/gemini'; // Points to your secure Vercel backend
+
             try {
-                const response = await fetch(GEMINI_API_URL, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // Structure matches what the backend expects to forward to Gemini
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
@@ -242,14 +227,14 @@
                         return callGemini(prompt, retries - 1, delay * 2); 
                     }
                     const errorData = await response.json();
-                    throw new Error(errorData.error.message || `API call failed with status: ${response.status}`);
+                    throw new Error(errorData.error || `API call failed with status: ${response.status}`);
                 }
 
                 const data = await response.json();
                 if (data.candidates && data.candidates.length > 0) {
                     let rawText = data.candidates[0].content.parts[0].text;
                     
-                    // Clean the response: The model sometimes prefixes the response with "html" or markdown fences.
+                    // Clean the response
                     let cleanedText = rawText.trim();
                     if (cleanedText.startsWith('```html')) {
                         cleanedText = cleanedText.substring(7);
