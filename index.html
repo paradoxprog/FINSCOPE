@@ -43,6 +43,20 @@
             background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
         }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -169,6 +183,7 @@
         </div>
     </footer>
     
+    <!-- Auth Modal -->
     <div id="auth-modal" class="fixed inset-0 z-[100] items-center justify-center hidden modal-backdrop px-4">
         <div class="bg-[#111] border border-gray-700 w-full max-w-md p-8 rounded-2xl shadow-2xl relative animate-fade-in-up">
             <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
@@ -195,12 +210,54 @@
                 <form id="email-form" class="space-y-4">
                     <input type="email" id="email-input" placeholder="name@example.com" class="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" required>
                     <input type="password" id="password-input" placeholder="Password" class="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all" required>
+                    
+                    <!-- Privacy Agreement Section -->
+                    <div class="flex items-start gap-3 mb-2 px-1">
+                        <div class="flex items-center h-5">
+                            <input id="privacy-checkbox" type="checkbox" class="w-4 h-4 rounded border-gray-700 bg-black/50 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900" required>
+                        </div>
+                        <label for="privacy-checkbox" class="text-xs text-gray-400 leading-tight">
+                            I agree to the <button type="button" id="view-policy-btn" class="text-blue-400 hover:underline">Privacy Policy</button> and consent to the secure processing of my financial data.
+                        </label>
+                    </div>
+
                     <p id="auth-error" class="text-red-400 text-sm hidden bg-red-500/10 p-2 rounded-lg"></p>
                     <button type="submit" id="email-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-blue-900/20">
                         Continue
                     </button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="policy-modal" class="fixed inset-0 z-[110] items-center justify-center hidden modal-backdrop px-4">
+        <div class="bg-[#111] border border-gray-700 w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[80vh] flex flex-col">
+            <h2 class="text-2xl font-bold text-white mb-4">Privacy Policy</h2>
+            
+            <div class="overflow-y-auto text-gray-400 text-sm space-y-4 pr-2 custom-scrollbar">
+                <p><strong>Last Updated:</strong> January 2026</p>
+                <p>At FINSCOPE, we prioritize your financial privacy. This policy outlines how your "Financial Twin" data is handled.</p>
+                
+                <h3 class="text-white font-semibold">1. Data Encryption</h3>
+                <p>All financial inputs (income, expenses, goals) are encrypted during transit and stored securely using Firebase. We utilize session-based encryption for your AI simulations.</p>
+                
+                <h3 class="text-white font-semibold">2. AI Processing</h3>
+                <p>This data is used solely to provide your personalized advice and is not used to train global models without your explicit consent.</p>
+                
+                <h3 class="text-white font-semibold">3. No Third-Party Selling</h3>
+                <p>We do not sell, rent, or trade your personal or financial information to third-party advertisers or data brokers.</p>
+                
+                <h3 class="text-white font-semibold">4. Local Storage</h3>
+                <p>Certain preference data is stored locally on your device to ensure a fast and seamless dashboard experience.</p>
+                
+                <h3 class="text-white font-semibold text-center mt-6">---</h3>
+                <p class="text-center italic text-xs">By using FINSCOPE, you acknowledge that financial simulations are for advisory purposes only and do not constitute professional financial advice.</p>
+            </div>
+
+            <button id="close-policy-btn" class="mt-6 w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-xl transition-all">
+                Close & Return
+            </button>
         </div>
     </div>
 
@@ -246,6 +303,12 @@
         const googleSignInBtn = document.getElementById('google-signin-btn');
         const mobileMenuBtn = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
+        
+        // Privacy UI Elements
+        const policyModal = document.getElementById('policy-modal');
+        const viewPolicyBtn = document.getElementById('view-policy-btn');
+        const closePolicyBtn = document.getElementById('close-policy-btn');
+        const privacyCheckbox = document.getElementById('privacy-checkbox');
 
         let isSignUpMode = false;
 
@@ -265,6 +328,18 @@
             authModal.classList.remove('flex');
         }
 
+        // Privacy Modal Functions
+        viewPolicyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            policyModal.classList.remove('hidden');
+            policyModal.classList.add('flex');
+        });
+
+        closePolicyBtn.addEventListener('click', () => {
+            policyModal.classList.add('hidden');
+            policyModal.classList.remove('flex');
+        });
+
         // Event Listeners
         loginBtn.addEventListener('click', () => openModal(false));
         signupBtn.addEventListener('click', () => openModal(true));
@@ -276,6 +351,14 @@
 
         // Auth Logic
         googleSignInBtn.addEventListener('click', () => {
+            // Standardizing behavior: Require checkbox even for Google sign-in for clarity, 
+            // though it's usually implied. For this UI, we validate checkbox.
+            if (!privacyCheckbox.checked) {
+                authError.textContent = "Please agree to the Privacy Policy first.";
+                authError.classList.remove('hidden');
+                return;
+            }
+
             signInWithPopup(auth, provider).catch(err => {
                 authError.textContent = err.message;
                 authError.classList.remove('hidden');
@@ -284,6 +367,14 @@
 
         emailForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // Validate Checkbox
+            if (!privacyCheckbox.checked) {
+                authError.textContent = "You must agree to the Privacy Policy to continue.";
+                authError.classList.remove('hidden');
+                return;
+            }
+
             const email = document.getElementById('email-input').value;
             const password = document.getElementById('password-input').value;
             authError.classList.add('hidden');
@@ -307,3 +398,4 @@
     </script>
 </body>
 </html>
+
